@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logga in | SupportNet</title>
+    <link rel="manifest" href="../assets/pwa/manifest.json">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../auth/auth.css">
+</head>
+<body>
+    <div class="login-container">       
+        <div class="login-card">
+            <div class="position-relative">
+                <button class="btn-close position-absolute top-0 end-0 m-2" id="close-login" aria-label="Close"></button>
+            </div>                                         
+            <div class="logo-container">
+                <img src="../assets/pics/logga.png" alt="SupportNet Logo">
+            </div>                     
+            <h5 class="text-center">Logga in</h5>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="mail">E-post:</label>
+                    <input type="email" id="mail" class="form-control" placeholder="Ange din e-post" required>
+                </div>
+                <div class="form-group">
+                    <label for="pwd">Lösenord:</label>
+                    <input type="password" id="pwd" class="form-control" placeholder="Ange ditt lösenord" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Logga in</button>
+                <div class="text-center mt-3">
+                    <a href="../auth/resetPassword.html" class="forgot-password">Glömt lösenord?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="../auth/userAuth.js"></script>
+</body>
+</html>

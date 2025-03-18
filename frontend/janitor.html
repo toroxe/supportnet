@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Janitor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles.css">
+
+    <style>
+        header h1 {
+            color: white; /* Gör rubriken vit */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Lägger till lite skugga */
+            font-size: 2.5rem;
+        }
+    </style>
+    
+</head>
+<body>
+    <header class="bg-dark text-white text-center py-3">
+        <h1>Janitor Board</h1>
+    </header>
+    
+    <main class="container mt-5">
+        <div class="d-grid gap-3">
+            <button class="btn btn-primary btn-lg" onclick="location.href='./janitorPages/userAdmin.html';">Användare</button>
+            <button class="btn btn-warning btn-lg" onclick="location.href='./janitorPages/newcookies.html';">Hantera Cookies</button>
+            <button class="btn btn-success btn-lg" onclick="location.href='./janitorPages/mycontracts.html';">Kontrakt</button>
+            <button class="btn btn-warning btn-lg" onclick="location.href='./janitorPages/ekonomi.html';">Ekonomi</button>
+            <button class="btn btn-primary btn-lg" onclick="location.href='./janitorPages/blogAdmin.html';">Skapa blogginlägg</button>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   
+
+</body>
+</html>

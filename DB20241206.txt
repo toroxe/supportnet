@@ -1,0 +1,18 @@
+Databas: my_fastapi_project
+Användarnamn: root
+Lösenord: frejaHund
+Host: localhost
+Port: 3307
+Låt mig veta om något behöver justeras eller kompletteras! 😊
+
+
+
+
+
+
+
+
+
+
+Det finns en ny version av GPT – Fortsätt chatta om du vill använda den tidigare versionen, 
+eller inled en ny chatt om du vill använda den senaste versionen.

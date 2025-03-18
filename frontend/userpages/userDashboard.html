@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title> 
+    <link rel="manifest" href="../assets/pwa/manifest.json">  
+    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="../userassets/userHeader.css"> <!-- Ny header-stil -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <!-- Dynamisk header -->
+    <div id="header-placeholder"></div>
+
+    <button id="installPWA" class="btn btn-primary">📲 Installera App</button>
+
+    <div class="container mt-4">
+        <h2 class="text-center">Välkommen till din Dashboard</h2>
+        <p class="text-center" id="userGreeting"></p>
+
+        <div id="serviceContainer" class="row">
+            <p class="text-center">Laddar dina tjänster...</p>
+        </div>
+
+    </div>
+    
+    <script src="../userscripts/userDashboard.js" defer></script>
+</body>
+</html>
+

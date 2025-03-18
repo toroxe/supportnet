@@ -1,0 +1,199 @@
+/* Grundläggande layout */
+#mobile-layout {
+    display: none; /* Initialt dolt */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+/* Banner */
+.banner {
+    width: 100%;
+    padding: 20px 0;
+    background-color: #ffffff;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.banner h1 {
+    font-size: 2rem;
+    color: #333;
+    margin: 0;
+}
+
+/* Centrera rubriken i bannern */
+.banner-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* Gilla-knapp styling */
+.like-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+}
+
+.like-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Tabell-styling */
+.table thead {
+    background-color: #ffffff;
+}
+
+.table tbody {
+    background-color: transparent;
+}
+
+/* Kolumnbredd 70/30 */
+.blog-post {
+    width: 70%;
+}
+
+.ad-item {
+    width: 30%;
+}
+
+/* Tabell för blogginlägg och annonser */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+th {
+    background-color: #ffffff;
+    color: #333;
+    padding: 10px;
+    text-align: center;
+    font-size: 1.2rem;
+    border-bottom: 2px solid #ddd;
+}
+
+td {
+    vertical-align: top;
+    padding: 15px;
+}
+
+/* Blogginlägg */
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.card img {
+    width: 100%;
+    height: auto;
+    border-bottom: 1px solid #ddd;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.card-content {
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Like-knapp */
+.like-btn {
+    display: inline-block;
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.like-btn:hover:not([disabled]) {
+    background-color: #0056b3;
+}
+
+.like-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Annons */
+.ad-item .card-img-top {
+    border-bottom: 1px solid #ddd;
+}
+
+.ad-item .btn-warning {
+    background-color: #ffc107;
+    border: none;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.ad-item .btn-warning:hover {
+    background-color: #e0a800;
+}
+
+/* Responsiv design */
+/* Standardlayout för stora skärmar */
+.content.responsive-layout {
+    display: none; /* Dölj den responsiva layouten */
+}
+
+@media (max-width: 768px) {
+    /* Döljer tabellen för små skärmar */
+    #desktop-layout {
+        display: none; /* Dölj desktop-layout */
+    }
+
+    #mobile-layout {
+        display: block; /* Visa mobil-layout */
+    }
+
+    .blog-post,
+    .ad-item {
+        width: 100%; /* Full bredd på liten skärm */
+    }
+
+    /* Anpassa kortdesignen */
+    .card {
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card img {
+        width: 100%; /* Bilden tar upp hela bredden av kortet */
+        height: auto; /* Behåll proportioner */
+    }
+
+    /* Anpassa sektioner för mobil */
+    #mobile-blog-section,
+    #mobile-ad-section {
+        margin-bottom: 20px;
+    }
+}
+

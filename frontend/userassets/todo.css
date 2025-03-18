@@ -1,0 +1,131 @@
+/* -------------------- Drag & Drop Placeholder -------------------- */
+/* Placeholder vid drag */
+.sortable-placeholder {
+    background-color: #f8f9fa; /* Ljus bakgrund */
+    border: 3px dashed #666; /* Tydlig streckad kant */
+    height: 80px; /* Samma som korten */
+    margin: 10px 0;
+    border-radius: 8px;
+    visibility: visible !important;
+    min-height: 60px; /* Ifall korten är mindre */
+}
+
+/* -------------------- To-Do kort -------------------- */
+.todo-card {
+    user-select: none;
+    position: relative;
+    min-height: 80px;
+    z-index: 10;
+    background-color: #fff;
+}
+
+/* -------------------- Modal, knappar och form -------------------- */
+#todoModal .modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#todoModalLabel {
+    font-weight: bold;
+    color: #333;
+}
+
+#todoModal .form-control, 
+#todoModal .form-select {
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#todoModal .form-check-input {
+    transform: scale(1.2);
+    margin-right: 5px;
+}
+
+#planeraTodoButton {
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 15px;
+    width: 100%;
+    font-size: 16px;
+}
+
+#planeraTodoButton:hover {
+    background-color: #218838;
+}
+
+/* -------------------- Kortfärger efter status -------------------- */
+.card.ej-paborjad { background-color: #fff3cd; }
+.card.paborjad { background-color: #cce5ff; }
+.card.avslutad { background-color: #d4edda; }
+.card.planerad { background-color: #a8e6cf; }
+
+/* -------------------- Statusindikatorer -------------------- */
+.status-indicator {
+    display: block;
+    margin: 0 auto 4px auto;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+.status-indicator[data-status="ej planerad"] {
+    background-color: transparent;
+    border: 1px solid gray;
+}
+
+.status-indicator[data-status="planerad"] { background-color: blue; }
+.status-indicator[data-status="enligt plan"] { background-color: green; }
+.status-indicator[data-status="fördröjd"] { background-color: orange; }
+.status-indicator[data-status="avbruten"] { background-color: red; }
+.status-indicator[data-status="arbete avslutat"] { background-color: purple; }
+.status-indicator[data-status="fakturerad"] { background-color: gold; }
+
+/* -------------------- Mobilanpassning -------------------- */
+@media (max-width: 768px) {
+    .todo-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .todo-lane, .card {
+        width: 88%;
+        margin-bottom: 10px;
+    }
+
+    .card-title {
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .card-text, .deadline {
+        display: none;
+    }
+
+    .btn.open-todo-btn {
+        font-size: 0.7rem;
+        padding: 2px 5px;
+    }
+
+    .btn {
+        font-size: 0.8rem;
+    }
+
+    table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .table-responsive {
+        display: block;
+        width: 100%;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+}
+
+

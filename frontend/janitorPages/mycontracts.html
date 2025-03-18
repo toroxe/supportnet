@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontrakthantering</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/styles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Kontrakthantering</h1>
+    </header>
+    
+    <main class="container mt-4">
+        <!-- Toppsektion med knapp -->
+        <div class="d-flex justify-content-between mb-3">
+            <h2>Mina Kontrakt</h2>
+            <button class="btn btn-success" onclick="location.href='contract.html'">+ Lägg till Kontrakt</button>
+        </div>
+        
+        <!-- Kontraktstabell -->
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Kundnummer</th>
+                    <th>Företagsnamn</th>
+                    <th>Status</th>
+                    <th>Ref Person</th>
+                    <th>Registreringsdatum</th>
+                    <th>UC Bedömd</th>
+                    <th>Email</th>
+                    <th>Telefon</th>
+                    <th>Åtgärder</th>
+                </tr>
+            </thead>
+            <tbody id="contractsTable">
+                <!-- Dynamisk data renderas här -->
+            </tbody>
+        </table>
+    </main>
+
+    <script src="../jscripts/contract.js" defer></script>
+</body>
+</html>
+
+

@@ -1,0 +1,167 @@
+/* Grundinställningar */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('../assets/pics/horse.png');
+    background-attachment: fixed; /* Fixera bakgrunden */
+    background-position: center; /* Centrera bilden */
+    background-repeat: no-repeat; /* Upprepa inte bilden */
+    background-size: cover; /* Anpassa så bilden täcker hela fönstret */
+    color: #333; /* Standardtextfärg */
+}
+
+body, html {
+    overflow-x: hidden !important;
+}
+
+
+/* Rubriker: Fet och svart text */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    /*color: #000; /* Svart färg */
+}
+
+/* Sammanfattningssektion (Summary) */
+.summary {
+    background-color: rgba(253, 246, 227, 0.9); /* Ljus bakgrund med transparens */
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Sektion: Home */
+/* Uppdatering för Home-sektionen */
+#home {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px 0;
+    background-color: rgba(253, 246, 227, 0.9); /* Ljus bakgrundsfärg med transparens */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#home h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #000; /* Svart färg för rubriken */
+    text-shadow: none; /* Tar bort skuggorna */
+}
+
+#home p {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: #333; /* Standardtextfärg */
+    text-shadow: none; /* Tar bort skuggorna */
+    margin-top: 10px;
+}
+
+/* Gör sektionen mer sammanhängande */
+#home .overlay {
+    z-index: 1;
+    padding: 20px;
+    background-color: rgba(253, 246, 227, 0.9); /* Matchar med sektionen */
+    border-radius: 10px;
+}
+
+.section {
+    padding: 15px 20px;
+    margin-bottom: 10px;
+}
+
+/* Sektioner: Why, How, ROI */
+.section .content {
+    display: flex;
+    align-items: stretch;
+    gap: 20px;
+    min-height: 300px;
+    height: auto;
+}
+
+.section .image, .section .text {
+    flex: 1;
+}
+
+.section .image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.section .text {
+    background-color: #fdf6e3;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+}
+
+.reverse .content {
+    flex-direction: row-reverse;
+}
+
+#custom-cookie-btn {
+    pointer-events: auto !important;
+    z-index: 9999 !important;
+}
+
+/* Responsiv design */
+
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+    #home h1 {
+        font-size: 2rem;
+    }
+    #home p {
+        font-size: 1.2rem;
+    }
+    .section .content {
+        flex-direction: column;
+    }
+    .section .image img {
+        height: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 12px;
+    }
+    #home h1 {
+        font-size: 1.5rem;
+    }
+    #home p {
+        font-size: 1rem;
+    }
+    .section {
+        padding: 10px;
+    }
+    .section .text {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .section .content {
+        flex-direction: column; /* Stapla element vertikalt */
+    }
+    .section .image, .section .text {
+        flex: 1 1 auto; /* Säkerställ att de tar upp rätt utrymme */
+    }
+    .section .image img {
+        width: 100%; /* Säkerställ att bilden fyller bredden */
+        height: auto; /* Behåll proportionerna */
+    }
+}

@@ -1,0 +1,53 @@
+Sammanställning: Vad som inte fungerar och möjliga orsaker
+1. Backend kommunikation med MariaDB
+Problem: Backend får felmeddelanden när den försöker ansluta till databasen, särskilt:
+Can't connect to MySQL server on 'my.supportnet.se:3306'.
+Plugin 'Aria' registration as a STORAGE ENGINE failed.
+Unknown storage engine.
+Möjliga orsaker:
+Felaktiga eller inkonsekventa användarrättigheter för MariaDB.
+Skadade eller saknade log- och metadatafiler i /var/lib/mysql/.
+Konfigurationsfiler (t.ex., my.cnf) kan sakna viktiga parametrar, eller parametrar är inkonsekventa.
+Konflikter med lås- och transaktionshantering i MariaDB (aria-loggar eller ib_logfiler).
+Behov: Felsök och säkerställ stabil MariaDB-installation innan backend kan fungera korrekt.
+2. E-postfunktion i backend
+Problem: E-postfunktionen, som tidigare fungerade, skickar inte längre meddelanden. Inga nya ändringar i mail.py har gjorts, vilket antyder att problemet inte ligger i själva e-postlogiken utan i kommunikation med mailservern.
+Möjliga orsaker:
+Backend har förlorat rättigheter eller autentiseringsuppgifter för att kontakta mailservern.
+Nätverkskonflikter eller blockerade portar (t.ex. port 587 för SMTP).
+Bristande integration mellan frontend och backend (skadad data skickas till mail.py).
+3. Frontend till Backend-kommunikation
+Problem: functions.js innehöll viss otydlighet i hur data skickades till backend (t.ex., formulärdata, validering och API-anrop).
+Formulärdata kanske inte skickas i rätt format.
+Felmeddelanden kan uppstå vid dåligt definierade headers eller bristande CORS-konfiguration.
+Möjliga orsaker:
+Frontend skickar data som backend inte kan tolka (felaktiga fält eller format).
+Backend svarar med fel på grund av otillräcklig validering i frontend.
+4. Konfiguration och Miljöhantering
+Problem: Konfigurationen för backend (databas, e-post, server) verkar delvis trasig eller ofullständig. Dessutom tappar vi ibland venv-miljön, vilket skapar extra hinder.
+Möjliga orsaker:
+Konfigurationsparametrar (databas, e-post) är inte synkade mellan lokalt och servermiljö.
+Upprepade installationer och felsökningar har skapat fragmenterade inställningar.
+Ovanliga nätverksinställningar eller DNS-problem för backend.
+5. Repetitiva Fel och Felsökningssvårigheter
+Problem: Samma steg för felsökning upprepas gång på gång (t.ex. starta om MariaDB, reparera databaser, omkonfigurera backend), utan att grundproblemet verkar lösas.
+Möjliga orsaker:
+Rotproblemet identifieras inte på grund av otillräcklig loggning eller dokumentation av tidigare steg.
+Backend-applikationen hanterar inte fel robust, vilket gör att små avvikelser kan krascha hela tjänsten.
+Förslag till åtgärder inför nästa tråd
+Databas: Återskapa och stabilisera MariaDB-installationen. Säkerställ:
+
+Rätt användarhantering och autentisering för backend.
+Korrekt konfiguration i my.cnf med tillägg av saknade mysqld-inställningar.
+Kontrollera och åtgärda skadade metadatafiler (aria_log_control, ib_logfile*, etc.).
+E-post: Validera e-postkonfigurationen med testscript för att säkerställa att backend kan skicka e-post via SMTP (t.ex. separat mail.py-test).
+
+Frontend: Testa och bekräfta att functions.js skickar korrekt formatterad data till backend. Säkerställ CORS och API-kommunikation.
+
+Backend: Fokusera på:
+
+Felhantering i API-endpoints för att isolera problem (databas, e-post, etc.).
+Validering av inkommande data från frontend.
+Dokumentation: Skapa ett protokoll för varje steg som testas och dess utfall, för att undvika repetitiva felsökningssteg.
+
+Meddela mig när du vill börja med en av dessa sektioner, så bygger vi vidare strukturerat!

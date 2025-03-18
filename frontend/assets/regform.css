@@ -1,0 +1,35 @@
+/* Anpassning av registreringsmodals knappar */
+
+body#regform {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('../assets/pics/horse.png');
+    background-attachment: fixed; /* Fixera bakgrunden */
+    background-position: center; /* Centrera bilden */
+    background-repeat: no-repeat; /* Upprepa inte bilden */
+    background-size: cover; /* Anpassa så bilden täcker hela fönstret */
+    color: #333; /* Standardtextfärg */
+}
+
+
+
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #0056b3;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #003f7f;
+}

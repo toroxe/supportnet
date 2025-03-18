@@ -1,0 +1,131 @@
+/* Header Grundlayout */
+header {
+    background-color: #0056b3; /* Blå bakgrund */
+    color: white;
+    display: flex;
+    justify-content: space-between; /* Länkar och knapp på höger sida */
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Logotyp och företagsnamn */
+.logo-container {
+    background-color: white; /* Vit bakgrund */
+    border-radius: 10px; /* Rundade hörn */
+    padding: 10px; /* Lite utrymme runt logotypen */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 120px; /* Justera efter logotypens storlek */
+    height: 120px; /* Justera efter logotypens storlek */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* En mjuk skugga för effekt */
+}
+
+.logo-container img {
+    height: 100px; /* Justerad höjd för logotypen */
+    /*margin-right: 10px;  Mellanrum mellan logotyp och text */
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.logo:hover {
+    color: #ffcc00; /* Accentfärg */
+}
+
+/* Navigation */
+.navbar {
+    display: flex;
+    justify-content: flex-end; /* Flyttar navigeringen till höger */
+    align-items: center;
+    gap: 20px; /* Avstånd mellan länkar */
+    margin-right: 20px; /* Justerar avstånd från kanten */
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: auto; /* Länkarna flyttas så nära mitten som möjligt */
+}
+
+nav a {
+  color: white !important;  /* Se till att texten alltid är vit */
+  font-weight: bold;  /* Gör texten fet */
+  text-transform: uppercase;  /* Valfritt: Gör texten versal */
+  font-size: 1.1rem;  /* Gör texten något större */
+  padding: 8px 12px;  /* Justera padding för bättre klickområde */
+  border-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+nav a:hover {
+  background-color: rgba(255, 255, 255, 0.2);  /* Lätt vit bakgrund vid hover */
+  color: #ffcc00;  /* Accentfärg vid hover */
+}
+
+/* Responsivitet */
+@media (max-width: 768px) {
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .navbar {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  
+    .login-button {
+      align-self: flex-end;
+      margin-top: 10px;
+    }
+  
+    .header .logo {
+      display: none; /* Dölj loggan på små skärmar */
+    }
+  
+    .header .company-name {
+      font-size: 1.2rem; /* Justera storlek */
+    }
+    .logo-container {
+        display: none;
+    }
+
+    .logo-img {
+        display: none;
+      }
+  }
+  
+  @media (max-width: 576px) {
+    .header {
+      align-items: center;
+    }
+  
+    .navbar {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .login-button {
+      width: 100%; /* Knappen sträcker sig över hela bredden */
+    }
+
+    .logo-container {
+        display: none;
+    }
+
+    .logo-img {
+        display: none;
+      }
+  }

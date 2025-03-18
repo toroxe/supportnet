@@ -1,0 +1,59 @@
+.contact-form {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background: url('../assets/pics/horse.png') no-repeat center center fixed; /* Bakgrundsbild */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    text-align: left;
+}
+
+.contact-form h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.contact-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #0056b3;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.contact-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #0056b3;
+    color: #fff;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.contact-form button:hover {
+    background-color: #003d80;
+}
+
+/* För att säkerställa rätt sökväg för loggan */
+.header-logo {
+    background-image: url("../pics/logo.png"); /* Uppdatera sökvägen om den är fel */
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 150px; /* Anpassa storlek */
+    height: 50px;
+    display: block;
+    margin: 0 auto; /* Centrerad logga */
+}
