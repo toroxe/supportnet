@@ -256,6 +256,10 @@ async function updateTodos() {
 function openTodoModal(todoId) {
     console.log("🟢 Öppnar modal för To-Do ID:", todoId);
 
+// 🔥 Lägg till detta
+    sessionStorage.setItem("selectedTodoId", todoId);
+    console.log("✅ selectedTodoId satt i sessionStorage:", todoId);
+    
     if (!todoId) {
         console.error("❌ Ingen To-Do ID angiven till openTodoModal!");
         return;
@@ -268,7 +272,7 @@ function openTodoModal(todoId) {
         console.error("❌ Ingen To-Do hittades med ID:", todoId);
         return;
     }
-
+    
     console.log("📌 To-Do hittad:", todo);
 
     let planeraButton = document.getElementById("planeraTodoButton");

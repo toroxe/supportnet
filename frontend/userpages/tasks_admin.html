@@ -3,131 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasks Admin – GANTT</title>
-    <link rel="stylesheet" href="../assets/styles.css">
+    <title>Projektadministration</title>
+    <link rel="stylesheet" href="../userassets/userHeader.css">
     <link rel="stylesheet" href="../userassets/tasks_admin.css">
+    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-
 <body>
-    <!-- Header -->
-    <div id="header-placeholder"></div>
+    <div id="header-container"></div>
 
-    <main class="container mt-4">
+    <main>
+        <h1 class="project-title">Projektplanering: <span id="todo-name">Laddar...</span></h1>
+        
+        <section class="project-info-container">
+            <h4>Projektbeskrivning</h4>
+            <p id="todo-description">Laddar...</p>            
+        </section>        
+        <section class="gantt-container">
+            <div class="gantt-grid">
+                <button id="add-task-btn" class="btn-add-task">Ny uppgift</button>
+                <!-- Här genereras cellerna dynamiskt -->
+            </div>                        
+            <div class="gantt-header">                
+                <div class="gantt-date-row" id="gantt-dates">
+                    <!-- Datum genereras dynamiskt -->
+                </div>
+            </div>
+            <div class="gantt-body">
+                <div class="gantt-tasks" id="gantt-tasks">
+                    <!-- Tasks och deras rader genereras här -->
+                </div>
+                <div class="gantt-grid" id="gantt-grid">
+                    <!-- Celler skapas dynamiskt här -->
+                </div>                
+            </div>
+        </section>        
+    </main>
 
-        <!-- Projektinfo -->
-        <section class="mb-4 p-3 bg-light rounded shadow-sm text-center">
-            <h1 id="projectTitle">Projektets namn här</h1>
-            <p id="projectDescription">Projektbeskrivningen kommer här.</p>
-        </section>
-
-        <!-- Actionknappar -->
-        <section class="mb-4 text-center">
-            <button class="btn btn-success me-2" id="createTaskButton" data-bs-toggle="modal" data-bs-target="#createTaskModal">Skapa uppgift</button>
-            <button class="btn btn-primary" id="addParticipantButton">Lägg till deltagare</button>
-        </section>
-
-        <!-- GANTT och deltagare -->
-        <section class="row">
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
             
-            <!-- Task-GANTT (75%) -->
-            <div class="col-md-9">
-                <div class="task-grid-container p-3 bg-white rounded shadow-sm">
-                    <h2 class="mb-3">GANTT-schema</h2>
-
-                    <!-- Datumraden -->
-                    <div id="dateRow"></div>
-
-                    <!-- Tasks (sidebar + grid) -->
-                    <div class="task-grid d-flex overflow-auto mt-3">
-
-                        <!-- Sidebar med task-titlar -->
-                        <div class="task-grid-sidebar p-2 bg-light">
-                            <p class="fw-bold">Uppgifter</p>
-                            <div id="taskTitles"></div>
-                        </div>
-
+            <div class="modal-body">
+                <!-- Formulärsektionen -->
+                <div class="modal-form">
+                    <h2>Ny uppgift</h2>
+                    
+                    <label for="task-title">Titel:</label>
+                    <input type="text" id="task-title" placeholder="Uppgiftens namn">
+                    
+                    <label for="task-desc">Beskrivning:</label>
+                    <textarea id="task-desc" placeholder="Beskriv uppgiften..."></textarea>
+    
+                    <label for="task-start">Startdatum:</label>
+                    <input type="date" id="task-start">
+    
+                    <label for="task-end">Slutdatum:</label>
+                    <input type="date" id="task-end">
+    
+                    <div class="modal-buttons">
+                        <button id="save-task-btn">Spara</button>
+                        <button id="report-btn">Rapport</button>
+                    </div>
+                </div>
+    
+                <!-- Rapportsektionen -->
+                <div class="modal-reports">
+                    <h2>Rapporter</h2>
+                    <div id="report-content">
+                        <p>Inga rapporter tillgängliga ännu...</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Deltagare (25%) -->
-            <div class="col-md-3">
-                <div class="participants-list p-3 bg-white rounded shadow-sm">
-                    <h2 class="mb-3">Deltagare</h2>
-                    <ul id="participantList" class="list-group"></ul>
-                </div>
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- Modal: Skapa uppgift -->
-    <div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createTaskModalLabel">Skapa ny uppgift</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="createTaskForm">
-                        <div class="mb-3">
-                            <label for="taskTitle" class="form-label">Titel</label>
-                            <input type="text" class="form-control" id="taskTitle" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="taskText" class="form-label">Beskrivning</label>
-                            <textarea class="form-control" id="taskText" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="taskProgress" class="form-label">Progress (%)</label>
-                            <input type="number" class="form-control" id="taskProgress" min="0" max="100" value="0">
-                        </div>
-                        <div class="mb-3">
-                            <label for="taskStartDate" class="form-label">Startdatum</label>
-                            <input type="date" class="form-control" id="taskStartDate" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="taskDueDate" class="form-label">Slutdatum</label>
-                            <input type="date" class="form-control" id="taskDueDate" required>
-                        </div>
-                        <button type="submit" class="btn btn-success">Spara uppgift</button>
-                    </form>
-                </div>
-            </div>
         </div>
-    </div>
-
-    <!-- Modal: Lägg till rapport -->
-    <div class="modal fade" id="createReportModal" tabindex="-1" aria-labelledby="createReportModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createReportModalLabel">Lägg till rapport</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="createReportForm">
-                        <div class="mb-3">
-                            <label for="reportTaskId" class="form-label">Uppgifts-ID</label>
-                            <input type="number" class="form-control" id="reportTaskId" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="reportText" class="form-label">Rapporttext</label>
-                            <textarea class="form-control" id="reportText" rows="4" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Spara rapport</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    </div>   
 
     <script src="../userscripts/tasks_admin.js" defer></script>
 </body>
 </html>
-
-
-

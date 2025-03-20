@@ -1,130 +1,106 @@
-// 🟡 BASE_URL till backend
-const BASE_URL = "https://my.supportnet.se";
+document.addEventListener("DOMContentLoaded", async () => {
+    console.log("Laddar header...");
+    await loadHeader();
+
+    console.log("Laddar projektinfo...");
+    await loadProjectInfo();
+
+    console.log("Laddar uppgifter...");
+    await loadTasks();
+
+    console.log("Laddar To-Do info...");
+    console.log("📌 SessionStorage:", JSON.stringify(sessionStorage, null, 2));
+    await loadTodoInfo();
+});
+
+//------------------------------------------------------------------------
+// poppar agila uppgiften
+// -----------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("taskModal");
+    const addTaskBtn = document.getElementById("add-task-btn");
+    const closeModal = document.querySelector(".close-btn");
+
+    // Öppna modal vid knapptryck
+    addTaskBtn.addEventListener("click", function () {
+        console.log("🟢 Öppnar modalen för ny uppgift...");
+        modal.style.display = "flex";
+    });
+
+    // Stäng modal när man klickar på stängningsknappen
+    closeModal.addEventListener("click", function () {
+        console.log("🔴 Stänger modalen...");
+        modal.style.display = "none";
+    });
+
+    // Stäng modal om man klickar utanför innehållet
+    window.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            console.log("🔴 Klick utanför modal – stänger...");
+            modal.style.display = "none";
+        }
+    });
+});
 
 async function loadHeader() {
-    console.log("🚀 Laddar header...");
-
     try {
-        const response = await fetch("../userpages/userHeader.html");
-        const headerHTML = await response.text();
-        document.getElementById("header-placeholder").innerHTML = headerHTML;
-
-        let userData = JSON.parse(sessionStorage.getItem("userData"));
-        if (userData && userData.c_name) {
-            document.getElementById("dashboardUser").textContent = `Välkommen, ${userData.c_name}!`;
-        }
-
-        // 🟢 Lägg till utloggningsfunktion
-        document.getElementById("logoutButton").addEventListener("click", function () {
-            console.log("👋 Användaren loggar ut...");
-            sessionStorage.clear();
-            window.location.href = "userDashboard.html";
-        });
-
+        const response = await fetch("/userpages/userHeader.html");
+        if (!response.ok) throw new Error("Header kunde inte laddas.");
+        const headerHtml = await response.text();
+        document.querySelector("#header-container").innerHTML = headerHtml;
+        console.log("Header laddad.");
     } catch (error) {
-        console.error("❌ Kunde inte ladda header:", error);
+        console.error("Kunde inte ladda header:", error);
     }
 }
 
-// 🟡 Ladda projektinfo från To-Do
-function loadProjectInfo() {
-    fetch(`${BASE_URL}/todos/1`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("authToken") // Om vi behöver auth!
+async function loadProjectInfo() {
+    try {
+        const response = await fetch("/api/get_project_info");
+        if (!response.ok) throw new Error("Projektinfo kunde inte laddas.");
+        const data = await response.json();
+        document.querySelector("#project-info").innerText = data.name || "Projektinfo ej tillgänglig";
+        console.log("Projektinfo laddad.");
+    } catch (error) {
+        console.error("Fel vid hämtning av projektinfo:", error);
+    }
+}
+
+async function loadTasks() {
+    try {
+        const response = await fetch("/api/get_tasks");
+        if (!response.ok) throw new Error("Uppgifter kunde inte laddas.");
+        const data = await response.json();
+        const taskList = document.querySelector("#task-list");
+        taskList.innerHTML = data.tasks.length ? 
+            data.tasks.map(task => `<li>${task.name}</li>`).join("") :
+            "<li>Inga uppgifter ännu...</li>";
+        console.log("Uppgifter laddade.");
+    } catch (error) {
+        console.error("Fel vid hämtning av tasks:", error);
+    }
+}
+
+async function loadTodoInfo() {
+    try {
+        const todoData = JSON.parse(sessionStorage.getItem("todoData"));
+        if (!todoData || !Array.isArray(todoData)) throw new Error("Ingen giltig To-Do data i sessionStorage.");
+        
+        const selectedTodoId = sessionStorage.getItem("selectedTodoId");
+        console.log("🔍 Letar efter To-Do med ID:", selectedTodoId);
+        console.log("📌 Tillgängliga To-Dos:", todoData);
+        
+        const todo = todoData.find(t => t.id == selectedTodoId);
+        if (!todo) {
+            console.warn("❌ Ingen matchande To-Do hittades för ID:", selectedTodoId);
+            return;
         }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error(`HTTP-fel ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        document.querySelector("#projectTitle").textContent = data.title || "Ingen titel";
-        document.querySelector("#projectDescription").textContent = data.text || "Ingen beskrivning";
-    })
-    .catch(error => console.error("Fel vid hämtning av projektinfo:", error));
+
+        document.querySelector("#todo-name").innerText = todo.name || "(Namnlös)";
+        document.querySelector("#todo-description").innerText = todo.text || "Ingen beskrivning tillgänglig.";
+        console.log("✅ To-Do info laddad: ", todo);
+    } catch (error) {
+        console.error("Fel vid hämtning av To-Do info:", error);
+    }
 }
 
-// 🟡 Spara ny uppgift
-document.querySelector("#createTaskForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const newTask = {
-        todo_id: 1, // Kopplas till projektets ID, uppdatera vid behov
-        title: document.querySelector("#taskTitle").value,
-        text: document.querySelector("#taskText").value,
-        progress: parseInt(document.querySelector("#taskProgress").value),
-        start_date: document.querySelector("#taskStartDate").value,
-        due_date: document.querySelector("#taskDueDate").value
-    };
-
-    fetch(`${BASE_URL}/tasks/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTask)
-    })
-    .then(response => response.json())
-    .then(() => {
-        alert("Uppgift skapad!");
-        // Ladda om tasks i gridden här om vi vill
-    })
-    .catch(error => console.error("Fel vid skapande av uppgift:", error));
-});
-
-// 🟡 Spara ny rapport
-document.querySelector("#createReportForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const newReport = {
-        task_id: parseInt(document.querySelector("#reportTaskId").value),
-        report_text: document.querySelector("#reportText").value
-    };
-
-    fetch(`${BASE_URL}/task_reports/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newReport)
-    })
-    .then(response => response.json())
-    .then(() => {
-        alert("Rapport sparad!");
-    })
-    .catch(error => console.error("Fel vid skapande av rapport:", error));
-});
-
-// 🟡 Ladda tasks till gridden
-function loadTasks() {
-    fetch(`${BASE_URL}/tasks/`)
-        .then(response => response.json())
-        .then(tasks => {
-            const taskTitles = document.querySelector("#taskTitles");
-            taskTitles.innerHTML = ""; // Rensa innan render
-
-            tasks.forEach(task => {
-                const taskDiv = document.createElement("div");
-                taskDiv.textContent = task.title;
-                taskDiv.classList.add("task-title");
-
-                // 💡 Färg baserat på progress
-                if (task.progress <= 25) {
-                    taskDiv.style.backgroundColor = "#ffcccc"; // Rödaktig
-                } else if (task.progress <= 75) {
-                    taskDiv.style.backgroundColor = "#fff5cc"; // Gulaktig
-                } else {
-                    taskDiv.style.backgroundColor = "#ccffcc"; // Grönaktig
-                }
-
-                taskTitles.appendChild(taskDiv);
-            });
-
-            // Här kan vi senare koppla in datumrendering också
-        })
-        .catch(error => console.error("Fel vid hämtning av tasks:", error));
-}
-
-// 🟡 Starta laddning av allt när sidan är redo
-window.addEventListener("DOMContentLoaded", () => {
-    loadProjectInfo();
-    loadTasks();
-});
