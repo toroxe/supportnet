@@ -6,6 +6,15 @@ const BASE_URL = "https://my.supportnet.se/";
 document.addEventListener("DOMContentLoaded", async function () {
     console.log("🚀 DOMContentLoaded - Laddar användardata och session...");
 
+    // 🟢 Kontrollera enhetstyp från sessionStorage
+    if (!sessionStorage.getItem("deviceType")) {
+        let isMobileDevice = /(Mobi|Android|iPhone|iPad|iPod|BlackBerry|Windows Phone|Opera Mini|IEMobile)/i.test(navigator.userAgent);
+        sessionStorage.setItem("deviceType", isMobileDevice ? "mobile" : "pc");
+        console.log("🔥 Enhetstyp satt direkt i dashboard:", sessionStorage.getItem("deviceType"));
+    } else {
+        console.log("📱 Enhetstyp hämtad från sessionStorage:", sessionStorage.getItem("deviceType"));
+    }    
+
     // 🟢 Hämta token och användardata från sessionStorage
     let token = sessionStorage.getItem("authToken");
     let userData = sessionStorage.getItem("userData");

@@ -57,6 +57,11 @@ async function loginUser() {
         // 🟢 Spara token och användardata i sessionStorage
         sessionStorage.setItem("authToken", data.token);
         sessionStorage.setItem("userData", JSON.stringify(data.user));
+        
+        // 🟢 Identifiera enheten vid inloggning
+        let isMobileDevice = /(Mobi|Android|iPhone|iPad|iPod|BlackBerry|Windows Phone|Opera Mini|IEMobile)/i.test(navigator.userAgent);
+        sessionStorage.setItem("deviceType", isMobileDevice ? "mobile" : "pc");
+        console.log("📌 Enhetstyp sparad i sessionStorage:", sessionStorage.getItem("deviceType"));
 
         if (data.user.contract) {
             sessionStorage.setItem("contract_id", data.user.contract);
@@ -75,7 +80,7 @@ async function loginUser() {
 }
 
 //-----------------------------------------------------------------------------
-// Triggar stänknappen på login formuläret
+// Triggar stängknappen på login formuläret
 // ---------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function () {
     const closeButton = document.querySelector("#close-login");

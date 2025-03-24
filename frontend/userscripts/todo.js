@@ -12,6 +12,8 @@ let token = sessionStorage.getItem("authToken");
 // 🌍 Globala variabler
 let userData = JSON.parse(sessionStorage.getItem("userData"));
 let contractId = sessionStorage.getItem("contract_id");
+let deviceType = sessionStorage.getItem("deviceType");
+console.log("📌 Enhet identifierad från sessionStorage:", deviceType);
 
 // Hitta alla lanes baserat på data-status
 const lanes = {
@@ -258,7 +260,20 @@ function openTodoModal(todoId) {
 
 // 🔥 Lägg till detta
     sessionStorage.setItem("selectedTodoId", todoId);
-    console.log("✅ selectedTodoId satt i sessionStorage:", todoId);
+    console.log("✅ selectedTodoId satt i sessionStorage:", todoId); 
+    
+    // 🟢 Kontrollera enhetstyp från sessionStorage
+    let deviceType = sessionStorage.getItem("deviceType");
+    console.log("📌 Enhet identifierad från sessionStorage:", deviceType);
+
+    // 🟢 Växla mellan admin och user vy
+    if (deviceType === "mobile") {
+        console.log("📱 Mobil enhet – omdirigerar till tasks_user.html");
+        window.location.href = "../userpages/tasks_user.html";
+        return;
+    } else {
+        console.log("💻 PC-enhet – öppnar admin modal");
+    }
     
     if (!todoId) {
         console.error("❌ Ingen To-Do ID angiven till openTodoModal!");

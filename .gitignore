@@ -1,1 +1,5 @@
 backend/venv/
+# Sandbox & dokumenthantering
+frontend/sandbox.html
+backend/db/sandbox.json
+backend/db/mydocs/

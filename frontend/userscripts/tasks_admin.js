@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById("taskModal");
     const addTaskBtn = document.getElementById("add-task-btn");
-    const closeModal = document.querySelector(".close-btn");
+    const closeModal = document.getElementById("close");   
 
     // Öppna modal vid knapptryck
     addTaskBtn.addEventListener("click", function () {
