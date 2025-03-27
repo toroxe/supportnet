@@ -7,12 +7,16 @@ from backend.api.user import router as user_router
 from backend.api.analytics import router as analytics_router
 from backend.api.contracts import router as contracts_router
 from backend.api.eco import router as eco_router
+from backend.api.upload import router as doc_router # Hantera dokument
 from backend.api.blogadmin import router as  blog_router # Importera routern från blogAdmin.py
+from backend.api.docs import router as mydocs_router
+from backend.api.submit_service import router as service_router
 from backend.userapi.auth import router as auth_router
 from backend.userapi.userboard import router as userboard_router
 from backend.userapi.post_it import router as postit_router
 from backend.userapi.todo import router as todo_router
 from backend.userapi.task import router as task_router
+from fastapi.staticfiles import StaticFiles
 
 
 import logging
@@ -47,6 +51,11 @@ app.include_router(userboard_router, prefix="/userapi")
 app.include_router(postit_router, prefix="/userapi")
 app.include_router(todo_router, prefix="/userapi")
 app.include_router(task_router, prefix="/userapi")
+app.include_router(doc_router, prefix="/api")
+app.mount("/mydocs", StaticFiles(directory="backend/db/mydocs"), name="mydocs")
+app.include_router(mydocs_router, prefix="/api")
+app.include_router(service_router, prefix="/api", tags=["Services"])
+
 
 # Middleware för att hantera cookies
 @app.middleware("http")

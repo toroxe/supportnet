@@ -104,3 +104,61 @@
     margin-bottom: 20px; /* Luft mellan varje input-fält */
 }
 
+label {
+    font-weight: 600;
+  }
+  
+  input[type="radio"] {
+    margin-right: 5px;
+  }
+  
+  @media (max-width: 768px) {
+    h2 {
+      font-size: 1.2rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    #service-options input[type="text"],
+    #service-options input[type="email"] {
+      width: 100%;
+    }
+  }
+
+  .form-group.text-center label {
+    display: inline-block;
+    margin-right: 20px;
+    font-weight: 500;
+}
+
+.radio-group {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+#service-options button {
+    background-color: #28a745;
+    color: #fff;
+    padding: 12px 40px;
+    width: 200px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+form input,
+form button {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+

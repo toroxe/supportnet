@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Enum, ForeignKey, DateTime, func,Boolean, Float, Date
+from sqlalchemy import Column, Integer, String, Text, Enum, ForeignKey, DateTime, func,Boolean, Float, Date, SmallInteger
 from sqlalchemy.orm import Mapped, relationship, clear_mappers
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime ,date
@@ -7,7 +7,7 @@ from pydantic import BaseModel, HttpUrl
 from typing import Optional
 import enum
 from enum import Enum as PyEnum
-
+from sqlalchemy.dialects.mysql import ENUM
     
 # --------------------------------------
 # Users Model
@@ -95,7 +95,6 @@ class ContractServices(Base):
     todo = Column(Boolean, default=False)
     postit = Column(Boolean, default=False)
     inbound = Column(Boolean, default=False)
-
     contract = relationship("Contract", back_populates="services")
     
     class Config:
@@ -130,8 +129,7 @@ class Transaction(Base):
 
 class BlogPost(Base):
     __tablename__ = "blog_posts"
-    __table_args__ = {'extend_existing': True}  # Viktigt för att undvika konflikt
-     
+    __table_args__ = {'extend_existing': True}  # Viktigt för att undvika konflikt     
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
@@ -229,4 +227,24 @@ class TaskReport(Base):
     class Config:
         from_attributes = True
 
-    
+# -----------------------------------------------------------
+# hanterar min tjänster
+# -----------------------------------------------------------
+
+Base = declarative_base()
+
+class ServiceRequest(Base):
+    __tablename__ = "service_requests"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    company = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False)
+    knowledge = Column(SmallInteger, default=0)
+    advice = Column(SmallInteger, default=0)
+    services = Column(SmallInteger, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    class Config:
+        from_attributes = True
+
