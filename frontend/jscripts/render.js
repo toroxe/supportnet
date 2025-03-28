@@ -5,6 +5,26 @@ document.addEventListener("DOMContentLoaded", () => {
     loadHeaderAndFooter(() => {
         console.log("Header och footer laddade!");        
     });
+
+        // Döljer "/pages/services.html" från URL-fältet om användaren är där
+    // Clean URL-paths (visar /services istället för /pages/services.html)
+    const path = window.location.pathname;
+
+    if (path.endsWith('/index.html')) {
+        history.replaceState({}, '', '/');
+    } else if (path.endsWith('/pages/blog.html')) {
+        history.replaceState({}, '', '/blog');
+    } else if (path.endsWith('/pages/services.html')) {
+        history.replaceState({}, '', '/services');
+    } else if (path.endsWith('/pages/contact.html')) {
+        history.replaceState({}, '', '/contact');
+    } else if (path.endsWith('/pages/about.html')) {
+        history.replaceState({}, '', '/about');
+    } else if (path.endsWith('/auth/userLogin.html')) {
+        history.replaceState({}, '', '/login');
+    } else if (path.endsWith('/pages/regform.html')) {
+        history.replaceState({}, '', '/member');
+    }
 });
 
 /** Funktion för att ladda header och footer **/
@@ -40,6 +60,9 @@ function loadHeaderAndFooter(callback) {
         })
         .catch(error => console.error('Error loading footer:', error));
 }
+
+
+
 
 
 

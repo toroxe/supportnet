@@ -8,6 +8,22 @@
     text-align: center; /* Centrera innehållet */
 }
 
+.overlay {
+    background-color: rgba(253, 246, 227, 0.9); /* Bakgrundsfärgen från index */
+    padding: 3rem 1rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+}
+
+h1 {
+font-size: 2.5rem;
+font-weight: 700;
+}
+
+p.lead {
+font-size: 1.25rem;
+}  
+
 /* Summary sektionen */
 #summary {
     background-color: rgba(253, 246, 227, 0.9); /* Ljus bakgrund */
@@ -37,7 +53,17 @@
     margin-bottom: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    text-align: center;    
+}
+
+#service-options input[type="text"],
+#service-options input[type="email"] {
+    width: 50%;
+    padding: 10px;
+    margin: 20px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center; /* centrera texten inuti fältet */
 }
 
 #service-options h2 {
@@ -106,26 +132,26 @@
 
 label {
     font-weight: 600;
-  }
-  
-  input[type="radio"] {
-    margin-right: 5px;
-  }
-  
-  @media (max-width: 768px) {
-    h2 {
-      font-size: 1.2rem;
-    }
-  }
+}
 
-  @media (max-width: 576px) {
-    #service-options input[type="text"],
-    #service-options input[type="email"] {
-      width: 100%;
-    }
-  }
+input[type="radio"] {
+margin-right: 5px;
+}
 
-  .form-group.text-center label {
+@media (max-width: 768px) {
+h2 {
+    font-size: 1.2rem;
+}
+}
+
+@media (max-width: 576px) {
+#service-options input[type="text"],
+#service-options input[type="email"] {
+    width: 100%;
+}
+}
+
+.form-group.text-center label {
     display: inline-block;
     margin-right: 20px;
     font-weight: 500;
@@ -160,5 +186,47 @@ form button {
     width: 100%;
     box-sizing: border-box;
 }
+
+/* Allmänt för .service-section */
+.service-section {
+    background-color: rgba(253, 246, 227, 0.9);
+    padding: 40px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* För kolumnerna */
+.row > .col-md-6 {
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+/* Tillägg för formatering på mobil (under 768px) */
+@media (max-width: 768px) {
+    .col-md-6 {
+        width: 100%;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input {
+    width: 60%;
+    text-align: center;
+}
+
 
 

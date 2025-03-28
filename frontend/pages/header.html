@@ -30,7 +30,7 @@
                             <a class="nav-link" href="../pages/contact.html">Kontakt</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="../pages/regform.html">Bli medlem</a>
+                            <a class="nav-link" href="../pages/regform.html">Testa</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="../auth/userLogin.html">Logga in</a>
@@ -44,3 +44,10 @@
     </div>       
    
 </header>
+
+<script>
+    if (window.location.pathname.endsWith('/auth/userLogin.html')) {
+      history.replaceState({}, '', '/login');
+    }
+  </script>
+  

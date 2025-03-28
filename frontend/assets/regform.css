@@ -12,7 +12,9 @@ body#regform {
     color: #333; /* Standardtextfärg */
 }
 
-
+h1 {
+    text-align: center;
+}
 
 .modal-content {
     border-radius: 10px;
@@ -32,4 +34,24 @@ body#regform {
 
 .btn-primary:hover {
     background-color: #003f7f;
+}
+
+.overlay {
+    background-color: rgba(253, 246, 227, 0.9); /* din gula standard */
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.overlay p {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 1.1rem;
+    color: #4b5563;
+}
+
+#test-banner {
+    background-color: rgba(253, 246, 227, 0.9); /* din standardgula */
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }

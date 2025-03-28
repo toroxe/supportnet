@@ -56,8 +56,33 @@ app.mount("/mydocs", StaticFiles(directory="backend/db/mydocs"), name="mydocs")
 app.include_router(mydocs_router, prefix="/api")
 app.include_router(service_router, prefix="/api", tags=["Services"])
 
+# ------------------------------------------------------------------------
+# Vår lilla honungsfälla
+# ------------------------------------------------------------------------
+from fastapi.responses import JSONResponse
+import asyncio
 
+# Trap bot-anrop som försöker nå känsliga filer
+SUSPECT_PATHS = [
+    ".env", "config.js", "proxy", "codes.php.save", "config.yml"
+]
+
+@app.middleware("http")
+async def trap_bots(request: Request, call_next):
+    path = request.url.path
+    for trap in SUSPECT_PATHS:
+        if trap in path:
+            await asyncio.sleep(5)  # Fördröjning för att göra det tråkigt för botten
+            return JSONResponse(
+                content={"error": "Nice try, bot 🐌"},
+                status_code=200,
+                headers={"Retry-After": "9999"}
+            )
+    return await call_next(request)
+
+# ---------------------------------------------------------------------------------------
 # Middleware för att hantera cookies
+# ---------------------------------------------------------------------------------------
 @app.middleware("http")
 async def cookie_middleware(request: Request, call_next):
     db = next(get_db())  # Generera en sessionsinstans

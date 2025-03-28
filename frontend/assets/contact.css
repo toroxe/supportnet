@@ -2,9 +2,9 @@
     max-width: 600px;
     margin: 50px auto;
     padding: 20px;
-    background: url('../assets/pics/horse.png') no-repeat center center fixed; /* Bakgrundsbild */
+    background-color: rgba(253, 246, 227, 0.9); /* Gul-transparent bakgrund */
+    border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
     text-align: left;
 }
 
@@ -56,4 +56,58 @@
     height: 50px;
     display: block;
     margin: 0 auto; /* Centrerad logga */
+}
+
+.overlay {
+    background-color: rgba(253, 246, 227, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.overlay h1 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.overlay p {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: #4b5563;
+}
+
+@media screen and (max-width: 600px) {
+    .contact-form {
+    margin: 20px 10px;
+    padding: 15px;
+}
+
+.contact-form h1 {
+    font-size: 1.5rem;
+}
+
+.contact-form label {
+    font-size: 0.9rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+    font-size: 0.95rem;
+    padding: 8px;
+}
+
+.contact-form button {
+    font-size: 1rem;
+    padding: 10px;
+}
+
+.overlay h1 {
+    font-size: 1.8rem;
+}
+
+.overlay p {
+    font-size: 1rem;
+}
 }

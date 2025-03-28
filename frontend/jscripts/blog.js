@@ -43,7 +43,7 @@ function renderBlogPost(post) {
         <div class="card mb-4">
             <div class="row g-0">
                 <div class="col-md-4">
-                    <img src="${post.image_url}" class="img-fluid rounded-start" alt="${post.title}">
+                    <img src="${post.image_url}" class="img-fluid rounded-start" alt="Blogginlägg: ${post.title} – från MySupportNet">
                 </div>
                 <div class="col-md-8">
                     <div class="card-body">
@@ -63,7 +63,7 @@ function renderBlogPost(post) {
 function renderAd(ad) {
     return `
         <div class="card mb-4">
-            <img src="${ad.image_url}" class="card-img-top" alt="${ad.title}">
+            <img src="${ad.image_url}" class="card-img-top" alt="Blogginlägg: ${ad.title} – från MySupportNet">
             <div class="card-body">
                 <h5 class="card-title">${ad.title}</h5>
                 <p class="card-text">${ad.content}</p>

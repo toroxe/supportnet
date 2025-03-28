@@ -10,16 +10,21 @@ body {
     background-color: #f9f9f9;
 }
 
+p {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: #333; /* Standardtextfärg */
+    text-shadow: none; /* Tar bort skuggorna */
+    margin-top: 10px;
+}
+
 /* Banner */
 .banner {
-    width: 100%;
-    padding: 20px 0;
-    background-color: #ffffff;
+    background-color: rgba(253, 246, 227, 0.9);/* samma gula som index */
+    color: #000;
+    padding: 1rem;
     text-align: center;
-    border-radius: 5px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-}
+  }  
 
 .banner h1 {
     font-size: 2rem;
@@ -49,42 +54,47 @@ body {
 
 /* Tabell-styling */
 .table thead {
-    background-color: #ffffff;
+background-color: #fff;
 }
 
 .table tbody {
-    background-color: transparent;
+background-color: rgba(253, 246, 227, 0.9); /* Vår signatur */
+}  
+  /* Allmän tabell */
+table {
+width: 100%;
+border-collapse: collapse;
+margin: 0 auto;
+background-color: rgba(253, 246, 227, 0.9); /* fallback */
+border-radius: 8px;
+overflow: hidden;
 }
 
-/* Kolumnbredd 70/30 */
+/* Rubrikrad */
+th {
+background-color: #fff;
+color: #222;
+padding: 12px;
+text-align: left;
+font-size: 1.1rem;
+border-bottom: 1px solid #ccc;
+}
+
+/* Innehållsceller */
+td {
+padding: 16px;
+border-bottom: 1px solid #eee;
+vertical-align: top;
+}
+
+/* Breddfördelning */
 .blog-post {
-    width: 70%;
+width: 70%;
 }
 
 .ad-item {
-    width: 30%;
-}
-
-/* Tabell för blogginlägg och annonser */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0 auto;
-}
-
-th {
-    background-color: #ffffff;
-    color: #333;
-    padding: 10px;
-    text-align: center;
-    font-size: 1.2rem;
-    border-bottom: 2px solid #ddd;
-}
-
-td {
-    vertical-align: top;
-    padding: 15px;
-}
+width: 30%;
+}  
 
 /* Blogginlägg */
 .card {
@@ -161,6 +171,13 @@ td {
 .content.responsive-layout {
     display: none; /* Dölj den responsiva layouten */
 }
+
+.overlay {
+    background-color: rgba(253, 246, 227, 0.9);
+    padding: 3rem 1rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+  } 
 
 @media (max-width: 768px) {
     /* Döljer tabellen för små skärmar */
