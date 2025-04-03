@@ -178,6 +178,7 @@ async function loadContract() {
                 if (service.todo) document.querySelector("#todo").checked = true;
                 if (service.postit) document.querySelector("#postit").checked = true;
                 if (service.inbound) document.querySelector("#inbound").checked = true;
+                if (service.survey) document.querySelector("#survey").checked = true;
             });
 
         } else {
@@ -260,7 +261,8 @@ function getServices() {
             userdoc: document.getElementById("userdoc").checked,
             todo: document.getElementById("todo").checked,
             postit: document.getElementById("postit").checked,
-            inbound: document.getElementById("inbound").checked
+            inbound: document.getElementById("inbound").checked,
+            survey: document.getElementById("survey").checked
         }
     ];
 
@@ -282,6 +284,7 @@ function loadServices(services) {
         if (service.todo) document.querySelector("#todo").checked = true;
         if (service.postit) document.querySelector("#postit").checked = true;
         if (service.inbound) document.querySelector("#inbound").checked = true;
+        if (service.survey) document.querySelector("#survey").checked = true;
     });
 }
 
@@ -362,6 +365,7 @@ async function updateContract(contractId) {
                 todo: document.querySelector("#todo").checked,
                 postit: document.querySelector("#postit").checked,
                 inbound: document.querySelector("#inbound").checked,
+                survey: document.querySelector("#survey").checked
             }
         ]
     };

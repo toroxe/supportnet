@@ -12,19 +12,21 @@
 <body>
     <!-- Dynamisk header -->
     <div id="header-placeholder"></div>
-
-    <button id="installPWA" class="btn btn-primary">📲 Installera App</button>
-
-    <div class="container mt-4">
-        <h2 class="text-center">Välkommen till din Dashboard</h2>
+    <main class="container mt-5">
+        
         <p class="text-center" id="userGreeting"></p>
 
         <div id="serviceContainer" class="row">
             <p class="text-center">Laddar dina tjänster...</p>
         </div>
-
-    </div>
+        <div class="pwa-install-wrapper text-center mt-5">
+            <button id="installPWA" class="btn btn-success">
+                📲 Installera som app
+            </button>
+        </div>        
+    </main>
     
+    <script src="../userscripts/userStandard.js" defer></script>
     <script src="../userscripts/userDashboard.js" defer></script>
 </body>
 </html>

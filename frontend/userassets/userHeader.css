@@ -11,6 +11,8 @@
     height: 60px;  /* Sätter höjden till en smal banner */
 }
 
+/* userHeader.css */
+
 .logo-container {
     display: flex;
     align-items: center;

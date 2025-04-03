@@ -26,6 +26,16 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
+                    <div id="aiStatus" style="
+                    width: 14px;
+                    height: 14px;
+                    border-radius: 50%;
+                    background-color: #dc3545; /* Röd = vilande */
+                    display: inline-block;
+                    margin-left: 10px;
+                    vertical-align: middle;
+                    " title="AI är vilande ⏸️">
+                    </div>
                     <h5 class="modal-title">Ny Post-It</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -33,8 +43,7 @@
                     <textarea id="postItText" class="form-control" rows="5" placeholder="Diktera din text här..."></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button id="startRecording" class="btn btn-success">▶️</button>
-                    <button id="pauseRecording" class="btn btn-warning">⏸️</button>
+                    <button id="startRecording" class="btn btn-success">▶️</button>                    
                     <button id="stopRecording" class="btn btn-danger">⏹️</button>
                     <button id="savePostIt" class="btn btn-primary">Spara</button>
                 </div>
@@ -42,7 +51,8 @@
         </div>
     </div>
 
-    <script src="../userscripts/postit.js"></script>
+    <script src="../userscripts/postit.js" defer></script>
+    <script src="../userscripts/userStandard.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

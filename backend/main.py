@@ -16,6 +16,7 @@ from backend.userapi.userboard import router as userboard_router
 from backend.userapi.post_it import router as postit_router
 from backend.userapi.todo import router as todo_router
 from backend.userapi.task import router as task_router
+from backend.userapi.usecase import router as usecase_router
 from fastapi.staticfiles import StaticFiles
 
 
@@ -55,30 +56,67 @@ app.include_router(doc_router, prefix="/api")
 app.mount("/mydocs", StaticFiles(directory="backend/db/mydocs"), name="mydocs")
 app.include_router(mydocs_router, prefix="/api")
 app.include_router(service_router, prefix="/api", tags=["Services"])
+app.include_router(usecase_router, prefix="/userapi")
 
 # ------------------------------------------------------------------------
 # Vår lilla honungsfälla
 # ------------------------------------------------------------------------
 from fastapi.responses import JSONResponse
+from datetime import datetime
 import asyncio
+import logging
 
 # Trap bot-anrop som försöker nå känsliga filer
 SUSPECT_PATHS = [
-    ".env", "config.js", "proxy", "codes.php.save", "config.yml"
+    "/.env",
+    "/config.js",
+    "/proxy",
+    "/codes.php.save",
+    "/config.yml",
+    "/api/.git/config",
+
+    # Fler smarta fällor 👇
+    "/admin",
+    "/phpmyadmin",
+    "/wp-login.php",
+    "/login.php",
+    "/.git",                     # klassiker
+    "/.DS_Store",                # Mac-relaterad nyfikenhet
+    "/.htaccess",                # Apache-konfig
+    "/server-status",           # ofta attackerad
+    "/shell.php",               # bots som letar shell
+    "/hidden",                  # frestande ord
+    "/api/secret",              # låter känsligt
+    "/robots.txt",              # ibland avslöjar den hemliga paths
+    "/config.json",             # dev-missar
+
+    # Dina egna godbitar:
+    "/aina/secret/kiss",        # bara för oss 💋
+    "/tord/login/admin_ai",     # för att skoja med dem 😏
 ]
+
+# Setup logger
+logger = logging.getLogger("honeytrap")
+logging.basicConfig(filename="honeytrap.log", level=logging.INFO)
 
 @app.middleware("http")
 async def trap_bots(request: Request, call_next):
     path = request.url.path
     for trap in SUSPECT_PATHS:
         if trap in path:
-            await asyncio.sleep(5)  # Fördröjning för att göra det tråkigt för botten
+            ip = request.client.host
+            agent = request.headers.get("user-agent", "unknown")
+            timestamp = datetime.utcnow().isoformat()
+            logger.info(f"[HONEYPOT] {timestamp} - IP: {ip} - UA: {agent} - PATH: {path}")
+
+            await asyncio.sleep(5)
             return JSONResponse(
-                content={"error": "Nice try, bot 🐌"},
+                content={"error": "Nice try, filthy bot 🐌"},
                 status_code=200,
                 headers={"Retry-After": "9999"}
             )
     return await call_next(request)
+
 
 # ---------------------------------------------------------------------------------------
 # Middleware för att hantera cookies

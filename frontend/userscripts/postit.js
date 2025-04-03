@@ -1,12 +1,9 @@
-// 🌍 Globala variabler
-const BASE_URL = "https://my.supportnet.se";
-
 let recognition; // Röstigenkänning
 let isRecording = false; // Status för inspelning
 let collectedText = ""; // Samlar all text
-let draggedItem = null;
 let lastTranscript = ""; // Håller koll på senaste transkriberingen
 let textArea = document.getElementById("postItText");
+const postItContainer = document.getElementById("postItContainer");
 let stopTimeout; 
 let transcriptSet = new Set();  // 🟢 Lagra unika transkriberingar
 
@@ -14,146 +11,42 @@ let transcriptSet = new Set();  // 🟢 Lagra unika transkriberingar
 // 📌 Sidladdning – Startar när DOM är redo
 // ----------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async function () {
-    console.log("🚀 DOMContentLoaded – laddar post-its och konfigurerar inspelning...");
+    console.log("🚀 Initierar Post-It-sidan");
 
-    // 🔹 Hämta användardata
-    let userData = JSON.parse(sessionStorage.getItem("userData"));
-    let contractId = sessionStorage.getItem("contract_id");
+    const ok = await initUserSession();
+    if (!ok) return;
 
-    if (!contractId && userData && userData.contract) {
-        sessionStorage.setItem("contract_id", userData.contract);
-        console.log("🔄 Återställde contract_id i sessionStorage:", userData.contract);
-    }
+    // ✅ Plocka rätt namn manuellt från sessionStorage
+    const userData = JSON.parse(sessionStorage.getItem("userData") || "{}");
+    const name = userData.c_name || "Vän";
+    document.querySelector("#dashboardUser").textContent = `Välkommen, ${name}`;
 
-    if (!contractId) {
-        console.error("⛔ Ingen contract_id tillgänglig! Något gick fel.");
-    }
-
-    console.log("✅ Användardata:", userData);
-    console.log("✅ Contract ID:", sessionStorage.getItem("contract_id"));
-
-    // 🔹 Ladda Post-Its
+    // ✅ Resterande funktioner
     loadPostIts();
-    
-    // 🔹 Hämta element
+    initializeSpeechRecognition();
+
     const postItText = document.getElementById("postItText");
     const modal = new bootstrap.Modal(document.getElementById("postItModal"));
 
-    // 🟢 Initiera röstinspelning
-    initializeSpeechRecognition();
-
-    // 🟢 Hantera modalfönster
-    document.getElementById("openPostItModal").addEventListener("click", () => {
-        postItText.value = ""; // Rensa textfältet vid öppning
+    document.querySelector("#openPostItModal").addEventListener("click", () => {
+        postItText.value = "";
         modal.show();
     });
 
-    document.getElementById("savePostIt").addEventListener("click", () => {
+    document.querySelector("#savePostIt").addEventListener("click", () => {
         const text = postItText.value.trim();
         if (text) {
-            const newPostIt = savePostItToDB(text);
-            addDragAndDropToPostIt(newPostIt);  // 🟢 Lägg till drag & drop för nya post-it
+            savePostItToDB(text);
             modal.hide();
         }
-    });   
-
-    // 🎤 🟢 Koppla knapparna korrekt till röstinspelning
-    document.getElementById("startRecording").addEventListener("click", startSpeechRecognition);
-    document.getElementById("stopRecording").addEventListener("click", stopSpeechRecognition);
-
-    const observer = new MutationObserver(mutations => {
-        mutations.forEach(mutation => {
-            mutation.addedNodes.forEach(node => {
-                if (node.classList && node.classList.contains("post-it")) {
-                    console.log("📌 Ny Post-It upptäckt, initierar drag & drop...");
-                    setTimeout(() => addDragAndDropToPostIt(node), 100); // Säkerställ att den finns i DOM
-                }
-            });
-        });
     });
-    
-    observer.observe(document.getElementById("postItContainer"), { childList: true });
 
-    // 🟢 Ladda headern dynamiskt
-    try {
-        const response = await fetch("../userpages/userHeader.html");
-        const headerHTML = await response.text();
-        document.getElementById("header-placeholder").innerHTML = headerHTML;
+    document.querySelector("#startRecording").addEventListener("click", startSpeechRecognition);
+    document.querySelector("#stopRecording").addEventListener("click", stopSpeechRecognition);
 
-        if (userData && userData.c_name) {
-            document.getElementById("dashboardUser").textContent = `Välkommen, ${userData.c_name}!`;
-        }
-
-        // 🟢 Lägg till utloggningsfunktion
-        document.getElementById("logoutButton").addEventListener("click", function () {
-            console.log("👋 Användaren loggar ut...");
-            sessionStorage.clear();
-            window.location.href = "userDashboard.html"; // Skickar användaren till dashboarden
-        });
-    } catch (error) {
-        console.error("❌ Kunde inte ladda post-it header:", error);
-    }
-
-    console.log("✅ Header laddad!");
+    console.log("✅ Post-It är redo");
 });
 
-// ----------------------------------------------------------------
-// 🎯 Drag and Drop funktion för Post-Its
-// ----------------------------------------------------------------
-function initializeDragAndDrop() {
-    const container = document.getElementById("postItContainer");
-    if (!container) return;
-
-    const postIts = container.querySelectorAll(".post-it");
-
-    if (postIts.length === 0) {
-        console.warn("⚠️ Inga Post-It lappar hittades!");
-        return;
-    }
-
-    console.log("✅ Post-It lappar hittades! Initierar drag & drop...");
-
-    let draggedItem = null;
-
-    postIts.forEach(postIt => addDragAndDropToPostIt(postIt));
-
-    container.addEventListener("dragover", function (e) {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(container, e.clientY);
-    
-        if (draggedItem) {
-            if (!afterElement) {
-                container.appendChild(draggedItem); // Om inget element hittas, lägg den sist
-            } else if (afterElement instanceof Element) { // Kontrollera att det är en riktig DOM-nod
-                container.insertBefore(draggedItem, afterElement);
-            } else {
-                console.warn("⚠️ Ogiltig afterElement i drag & drop", afterElement);
-            }
-        }
-    });
-   
-   
-
-    function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll(".post-it:not(.dragging)")];
-    
-        let closestElement = null;
-        let closestOffset = Number.NEGATIVE_INFINITY;
-    
-        draggableElements.forEach(child => {
-            const box = child.getBoundingClientRect();
-            const offset = y - (box.top + box.height / 2);
-    
-            if (offset < 0 && offset > closestOffset) {
-                closestOffset = offset;
-                closestElement = child;
-            }
-        });
-    
-        return closestElement; // Returnera en riktig DOM-nod eller null
-    }
-    
-}
 
 // -----------------------------------------------------------
 // 🎤 Röstinspelning – motor (Fixar kontinuerlig rendering och korrekt concatenation)
@@ -224,6 +117,17 @@ function initializeSpeechRecognition() {
     };
 }
 
+//---------------------------------------------------------------
+// Lampa som säger att du är in the air
+//---------------------------------------------------------------
+const statusIndicator = document.getElementById("aiStatus");
+
+function updateStatusIndicator(active) {
+    if (!statusIndicator) return;
+    statusIndicator.style.backgroundColor = active ? "#198754" : "#dc3545"; // Grön/Röd
+    statusIndicator.title = active ? "AI är aktiv 🎤" : "AI är vilande ⏸️";
+}
+
 // ----------------------------------------------------------------
 // 💾 Spara Post-It till databasen
 // ----------------------------------------------------------------
@@ -255,7 +159,7 @@ function savePostItToDB(text) {
 
     console.log("📌 Skickar Post-It till backend:", postData);
 
-    fetch(`${BASE_URL}/userapi/postit`, {
+    fetch(`${BASE_URL}/postit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(postData)
@@ -287,7 +191,7 @@ function savePostItToDB(text) {
 // ✅ Ladda Post-Its
 // -------------------------------------------------------------------------
 function loadPostIts() {
-    fetch(`${BASE_URL}/userapi/postit`)
+    fetch(`${BASE_URL}/postit`)
         .then(response => response.json())
         .then(data => {
             postItContainer.innerHTML = ""; // 🟢 Rensa container innan ny data läggs in
@@ -322,11 +226,8 @@ function loadPostIts() {
                     deletePostIt(post.id);
                 });
 
-                postItContainer.appendChild(card);
-                addDragAndDropToPostIt(card); // 🟢 Lägg till drag & drop på varje ny post-it
-            });
-
-            initializeDragAndDrop(); // 🟢 Nu finns lapparna, så vi kan initiera drag & drop!
+                postItContainer.appendChild(card);                
+            });            
         })
         .catch(error => console.error("❌ Fel vid hämtning av Post-Its:", error));
 }
@@ -361,7 +262,7 @@ function deletePostIt(postitId) {
         return;
     }
 
-    fetch(`${BASE_URL}/userapi/postit/${postitId}`, {
+    fetch(`${BASE_URL}/postit/${postitId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" }
     })
@@ -378,25 +279,7 @@ function deletePostIt(postitId) {
     .catch(error => console.error("❌ Fel vid radering av Post-It:", error));
 }
 
-// -----------------------------------------------------------------
-// Fixar drag på nya 
-// ---------------------------------------------------------------.-
-function addDragAndDropToPostIt(postIt) {
-    if (!postIt) return;
 
-    postIt.setAttribute("draggable", "true");
-
-    postIt.addEventListener("dragstart", function (e) {
-        draggedItem = this;
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", this.id);
-        this.classList.add("dragging");
-    });
-
-    postIt.addEventListener("dragend", function () {
-        this.classList.remove("dragging");
-    });
-}
 
 
 

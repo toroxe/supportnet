@@ -30,6 +30,7 @@ def company_services(db: Session = Depends(get_db)):
         if services.todo: service_list.append("To-Do List")
         if services.postit: service_list.append("Post-It Notes")
         if services.inbound: service_list.append("Inbound Management")
+        if services.survey: service_list.append("Survey Access")
 
     return {
         "status": "OK",

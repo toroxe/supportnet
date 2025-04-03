@@ -60,7 +60,8 @@ def get_all_contracts(db: Session = Depends(get_db)):
                     "userdoc": s.userdoc,
                     "todo": s.todo,
                     "postit": s.postit,
-                    "inbound": s.inbound
+                    "inbound": s.inbound,
+                    "survey": s.survey
                 } for s in contract.services
             ] if contract.services else []
         ) for contract in contracts
@@ -96,7 +97,8 @@ def get_contract_by_id(contract_id: int, db: Session = Depends(get_db)):
                 "userdoc": s.userdoc,
                 "todo": s.todo,
                 "postit": s.postit,
-                "inbound": s.inbound
+                "inbound": s.inbound,
+                "survey": s.survey
             } for s in contract.services
         ] if contract.services else []
     )
@@ -141,6 +143,7 @@ def create_contract(payload: ContractPayload, db: Session = Depends(get_db)):
                 todo=service.get("todo", False),
                 postit=service.get("postit", False),
                 inbound=service.get("inbound", False),
+                survey=service.get("survey", False),  # 🔥 Lägg till denna
             )
             db.add(new_service)
 
@@ -193,6 +196,7 @@ def update_contract(contract_id: int, payload: ContractPayload, db: Session = De
                     todo=service.get("todo", False),
                     postit=service.get("postit", False),
                     inbound=service.get("inbound", False),
+                    survey=service.get("survey", False),  # 🔥 Lägg till denna                    
                 )
                 db.add(new_service)
             else:

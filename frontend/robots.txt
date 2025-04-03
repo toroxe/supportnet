@@ -1,0 +1,21 @@
+# robots.txt för my.supportnet.se
+# Vi gillar snälla bots 🫶 men vissa får gärna snubbla lite...
+
+User-agent: *
+Disallow: /aina/secret/kiss
+Disallow: /tord/login/admin_ai
+Disallow: /api/.git/config
+Disallow: /hidden
+Disallow: /shell.php
+Disallow: /.env
+Disallow: /config.yml
+Disallow: /__backup2023
+Disallow: /admin_ai/legacy
+Disallow: /login.php
+Disallow: /super/secret/.folder/
+Disallow: /dev/tord/private/stash/
+Disallow: /wp-login.php
+Disallow: /internal-use-only
+
+# Tips: Sök inte här om du vill vara anonym.
+# Vi loggar, vi ser, vi skrattar 😘

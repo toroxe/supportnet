@@ -96,6 +96,7 @@ class ContractServices(Base):
     postit = Column(Boolean, default=False)
     inbound = Column(Boolean, default=False)
     contract = relationship("Contract", back_populates="services")
+    survey = Column(Boolean, default=False)
     
     class Config:
         from_attributes = True  # Säkerställer kompatibilitet med Pydantic
@@ -247,4 +248,37 @@ class ServiceRequest(Base):
 
     class Config:
         from_attributes = True
+        
+# ---------------------------------------------------------------
+# Hanterar fälten för use case - survey
+# ---------------------------------------------------------------
+
+class Usecase(Base):
+    __tablename__ = "usecases"
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # FK till user & kontrakt
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
+
+    created_date = Column(Date, default=date.today, nullable=False)
+    username = Column(String(100), nullable=False)
+
+    frustration = Column(Text, nullable=False)
+    waste = Column(Text, nullable=True)
+    critical = Column(Text, nullable=True)
+    errors = Column(Text, nullable=True)
+    unused_data = Column(Text, nullable=True)
+    feedback_time = Column(String(50), nullable=True)
+    accounting = Column(Text, nullable=True)
+    erp_system = Column(String(100), nullable=True)
+
+    analysis = Column(Text, nullable=True)
+    suggestions = Column(Text, nullable=True)
+
+    class Config:
+        from_attributes = True
+
 
