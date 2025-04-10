@@ -1,21 +1,37 @@
 // ------------------------------------------------------------
-// 🌟 Dashboard – klient till drottningen
+// 🌟 DETTA ÄR STANDARD - START FÖR VARJE USERXXX.js
 // ------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("🚀 Initierar dashboard...");
-
+    
     const ok = await initUserSession();
     if (!ok) return;
 
+    const contract_id = sessionStorage.getItem("contract_id");
+    console.log("Test konsoll",contract_id); 
+
+    // 🩹 Se till att contract_id sätts korrekt om det saknas
+    const userDataRaw = sessionStorage.getItem("userData");
+    if (!sessionStorage.getItem("contract_id") && userDataRaw) {
+        const userData = JSON.parse(userDataRaw);
+        if (userData.contract) {
+            sessionStorage.setItem("contract_id", userData.contract);
+            console.log("📌 contract_id satt från userData:", userData.contract);
+        } else {
+            console.warn("⚠️ userData.contract saknas!");
+        }
+    }
+
+    // Nu är sessionen säker – bygg sidan
     try {
         const token = sessionStorage.getItem("authToken");
         const dashboardData = await fetchDashboardData(token);
+        console.log("Min data nu och här",dashboardData);
         if (!dashboardData?.data) return;
 
         const services = dashboardData.data.services;
         renderServices(services);
-
     } catch (error) {
         console.error("❌ Fel vid hämtning av dashboard-data:", error);
     }
@@ -25,18 +41,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 // 🔁 Hämta dashboard-data från backend
 // ------------------------------------------------------------
 async function fetchDashboardData(token) {
-    if (!token) return null;
+    try {
+        const response = await fetch(`${BASE_URL}/dashboard`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
 
-    const response = await fetch(`${BASE_URL}dashboard`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
+        let result;
+
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            const text = await response.text();  // läs EN gång!
+            console.error("❌ Kunde inte parsa JSON. Server-svar:", text);
+            return null;
         }
-    });
 
-    if (!response.ok) return null;
-    return await response.json();
+        console.log("🎯 Fick dashboard-data:", result);
+
+        if (result.status === "OK") {
+            return result;
+        } else {
+            console.warn("⚠️ Dashboard-status:", result.message);
+            return null;
+        }
+
+    } catch (err) {
+        console.error("❌ Fel vid hämtning av dashboard:", err);
+        return null;
+    }
 }
 
 // ------------------------------------------------------------

@@ -30,9 +30,9 @@ async function loginUser() {
     console.log("🔥 Försöker logga in...");
 
     const email = document.querySelector("#mail")?.value.trim();
-    const password_hash = document.querySelector("#pwd")?.value.trim();
+    const password = document.querySelector("#pwd")?.value.trim();
 
-    if (!email || !password_hash) {
+    if (!email || !password) {
         alert("Fyll i både e-post och lösenord!");
         return;
     }
@@ -41,7 +41,7 @@ async function loginUser() {
         const response = await fetch(`${BASE_URL}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: email, password_hash: password_hash }) 
+            body: JSON.stringify({ email: email, password: password })
         });
 
         console.log(`🔍 Response status: ${response.status}`);
@@ -51,12 +51,14 @@ async function loginUser() {
             throw new Error(`Felaktigt användarnamn eller lösenord! Serverns svar: ${errorText}`);
         }
 
-        const data = await response.json();
+        const data = await response.json();        
         console.log("✅ Inloggning lyckades:", data);
+        sessionStorage.setItem("🔥full_auth", JSON.stringify(data));
 
         // 🟢 Spara token och användardata i sessionStorage
         sessionStorage.setItem("authToken", data.token);
         sessionStorage.setItem("userData", JSON.stringify(data.user));
+        sessionStorage.setItem("contract", data.contract);
         
         // 🟢 Identifiera enheten vid inloggning
         let isMobileDevice = /(Mobi|Android|iPhone|iPad|iPod|BlackBerry|Windows Phone|Opera Mini|IEMobile)/i.test(navigator.userAgent);
@@ -69,7 +71,7 @@ async function loginUser() {
         } else {
             console.error("⛔ Inloggning returnerade INGEN contract_id!");
         }
-
+        
         // 🔥 Redirect till dashboard
         window.location.href = "../userpages/userDashboard.html";
 

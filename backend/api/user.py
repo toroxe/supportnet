@@ -15,17 +15,17 @@ router = APIRouter()
 
 # Pydantic-modeller
 class UserSchema(BaseModel):
-    id: Optional[int] = None
+    user_id: Optional[int] = None
     c_name: str
     s_name: str
     email: str
     role: str
     status: str
-    password_hash: str
+    password_hash: str | None = None  # 🟢 Måste finnas
     session_cookie: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-    company_name: str
+    contract_id: Optional[int] = 1
     rights: str
     active: bool  # ✅ Lägger till active
 
@@ -36,26 +36,53 @@ class UserSchema(BaseModel):
 # GET: Alla användare
 # -------------------------------------------------------------------------------
 @router.get("/users")
-def get_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
+def get_all_users(db: Session = Depends(get_db)):
+    users = db.query(
+        User.user_id.label("id"),
+        User.contract_id,
+        User.c_name,
+        User.s_name,
+        User.email,
+        User.status,
+        User.role,
+        User.rights,
+        Contract.company_name
+    ).join(
+        Contract, User.contract_id == Contract.contract_id, isouter=True  # 🧠 Byt till outer join
+    ).all()
+
+    users_json = []
+    for user in users:
+        users_json.append({
+            "id": user.id,
+            "contract_id": user.contract_id,
+            "company_name": user.company_name or "saknas",  # Lägg till fallback
+            "full_name": f"{user.c_name} {user.s_name}",
+            "email": user.email,
+            "status": user.status,
+            "role": user.role,
+            "rights": user.rights
+        })
+
+    return users_json
 
 # -----------------------------------------------------------------------------
 # GET: En specifik user
 # ----------------------------------------------------------------------------
 @router.get("/users/{user_id}", response_model=dict)
 def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.user_id == user_id).first()
     
     if not user:
         raise HTTPException(status_code=404, detail="Användare hittades inte")
 
     return {
-        "id": user.id,
+        "id": user.user_id,  # ✅
+        "contract_id": user.contract_id,  # 🟢 Lägg till detta
         "name": f"{user.c_name} {user.s_name}",
         "email": user.email,
         "role": user.role,
-        "status": user.status,
-        "company_name": user.company_name,  # ✅ Återställd
+        "status": user.status,        
         "rights": user.rights,  # ✅ Återställd
         "password_hash": user.password_hash  # 🔥 Lägger till lösenordet i svaret
     }
@@ -63,90 +90,69 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 # ----------------------------------------------------------------------------
 # POST: Skapa en ny användare
 # ----------------------------------------------------------------------------
-@router.post("/users", response_model=UserSchema)
-def create_user(user: UserSchema, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.email == user.email).first()
+@router.post("/users")
+def create_user(payload: UserSchema, db: Session = Depends(get_db)):
+    existing_user = db.query(User).filter(User.email == payload.email).first()
     if existing_user:
-        raise HTTPException(status_code=400, detail="E-postadressen används redan!")
+        raise HTTPException(status_code=400, detail="Användare med denna e-post finns redan")
 
-    try:
-        hashed_password = hash_password(user.password_hash)  # Hasha lösenordet
-        new_user = User(
-            c_name=user.c_name,
-            s_name=user.s_name,
-            email=user.email,
-            password_hash=hashed_password,  # Sparar hashat lösenord
-            role="CUSTOMER",
-            status="ACTIVE",
-            company_name="MySupportNet",  # Default företagsnamn
-            rights="READ",
-            active=True
-        )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        return new_user
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Fel: Dubbel e-post!")
+    new_user = User(
+    c_name=payload.c_name,
+    s_name=payload.s_name,
+    email=payload.email,
+    password_hash=payload.password_hash or payload.email,  # 🔐 fallback till epost om tomt
+    role=payload.role,
+    rights=payload.rights,
+    active=payload.active if payload.active is not None else True,
+    contract_id=payload.contract_id if payload.contract_id else 1
+    )
+
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {"message": "Användare skapad", "user_id": new_user.user_id}
 
 # ---------------------------------------------------------------------------
 # PUT: Uppdatera en användare
 # ---------------------------------------------------------------------------
-@router.put("/users/{user_id}", response_model=UserSchema)
-def update_user(user_id: int, updated_data: UserSchema, db: Session = Depends(get_db)):
-    # Hämta befintlig användare från databasen
-    user = db.query(User).filter(User.id == user_id).first()
-    
+@router.put("/users/{user_id}")
+def update_user(user_id: int, payload: UserSchema, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="Användaren hittades inte!")
+        raise HTTPException(status_code=404, detail="Användaren hittades inte")
 
-    try:
-        # Uppdatera övriga fält
-        user.c_name = updated_data.c_name
-        user.s_name = updated_data.s_name
-        user.email = updated_data.email
-        user.role = updated_data.role
-        user.status = updated_data.status
-        user.rights = updated_data.rights
-        user.company_name = updated_data.company_name
-        user.active = updated_data.active
+    user.c_name = payload.c_name
+    user.s_name = payload.s_name
+    user.email = payload.email
+    user.role = payload.role
+    user.rights = payload.rights
+    user.active = payload.active if payload.active is not None else user.active
+    user.contract_id = payload.contract_id if payload.contract_id else user.contract_id
 
-        # Endast uppdatera lösenord om ett nytt anges i klartext
-        if updated_data.password_hash:
-            if not updated_data.password_hash.startswith("$2b$"):  # Kontrollera om det redan är hashat
-                user.password_hash = hash_password(updated_data.password_hash)
-            else:
-                user.password_hash = updated_data.password_hash  # Behåll befintlig hash
+    db.commit()
+    db.refresh(user)
 
-
-        # Spara ändringarna i databasen
-        db.commit()
-        db.refresh(user)
-        return user
-
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Fel vid uppdatering av användare.")
+    return {"message": "Användare uppdaterad", "user_id": user.user_id}
 
 # ---------------------------------------------------------------------------
 # DELETE: Radera en användare
 # ---------------------------------------------------------------------------
 @router.delete("/users/{user_id}", response_model=dict)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.user_id == user_id).first()
     
     if not user:
         raise HTTPException(status_code=404, detail="Användare hittades inte")
 
     # 🛑 Hämta all relevant data innan radering
     deleted_user_data = {
-        "id": user.id,
+        "id": user.user_id,  # ✅
         "name": f"{user.c_name} {user.s_name}",
         "email": user.email,
         "role": user.role,
-        "status": user.status,
-        "company_name": user.company_name,  # ✅ Återställd
+        "status": user.status,        
         "rights": user.rights  # ✅ Återställd
     }
 

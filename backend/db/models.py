@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Enum, ForeignKey, DateTime, func,Boolean, Float, Date, SmallInteger
+from sqlalchemy import Column, Integer, String, Text, Enum, ForeignKey, DateTime, func,Boolean, Float, Date, SmallInteger, TIMESTAMP
 from sqlalchemy.orm import Mapped, relationship, clear_mappers
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime ,date
@@ -8,6 +8,7 @@ from typing import Optional
 import enum
 from enum import Enum as PyEnum
 from sqlalchemy.dialects.mysql import ENUM
+from sqlalchemy.sql import text
     
 # --------------------------------------
 # Users Model
@@ -15,23 +16,23 @@ from sqlalchemy.dialects.mysql import ENUM
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, primary_key=True, autoincrement=True)  # <- ändrat från id
+    contract_id = Column(Integer, ForeignKey("contracts.contract_id"), nullable=False)  # <- ny koppling
     c_name = Column(String(255), nullable=False)
     s_name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    role = Column(String(50), nullable=False, default="PROSPECT")  # Borttagen Enum
-    status = Column(String(50), nullable=False, default="PROSPECT")  # Borttagen Enum
+    role = Column(String(50), nullable=False, default="PROSPECT")
+    status = Column(String(50), nullable=False, default="PROSPECT")
     password_hash = Column(String(255), nullable=False)
     session_cookie = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    company_name = Column(String(100), nullable=False, default="MySupportNet")
-    rights = Column(String(50), nullable=False, default="NONE")  # Sträng istället för Enum
-    active = Column(Boolean, default=True, nullable=False)  # 🔥 Nytt fält för aktivering/inaktivering
-    
+    rights = Column(String(50), nullable=False, default="NONE")
+    active = Column(Boolean, default=True, nullable=False)
+
     postits = relationship("PostIt", back_populates="user")
     tasks = relationship("Task", back_populates="user")
-    
+
     class Config:
         from_attributes = True
 
@@ -57,49 +58,50 @@ class AnalyticsLog(Base):
 # --------------------------------------
 # Kontrakt Model
 # --------------------------------------
+
 class Contract(Base):
     __tablename__ = "contracts"
-    
-    id = Column(Integer, primary_key=True, index=True)
+
+    contract_id = Column(Integer, primary_key=True, index=True)
     company_name = Column(String(100), nullable=False)
     ref_person = Column(String(50), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     phone = Column(String(20), nullable=False)
     zip = Column(String(10), nullable=False)
     address = Column(String(255), nullable=False)
-    city = Column(String(100), nullable=False)  # ✅ NYTT FÄLT
+    city = Column(String(100), nullable=False)
     credit_assessed = Column(Boolean, default=False)
-    pay_cond = Column(String(50), nullable=False)  # ✅ NYTT FÄLT
+    pay_cond = Column(String(50), nullable=False)
     invoice_model = Column(String(50), nullable=True)
     registration_date = Column(DateTime, server_default=func.now())
-    status = Column(Boolean, default=True, nullable=False)  # Aktivt eller inaktivt kontrakt
-    
+    status = Column(Boolean, default=True, nullable=False)
+
     services = relationship("ContractServices", back_populates="contract", cascade="all, delete-orphan")
     todos = relationship("Todo", back_populates="contract", cascade="all, delete-orphan")
 
     class Config:
-        from_attributes = True  # Säkerställer kompatibilitet med Pydantic
+        from_attributes = True
         
 # -------------------------------------------------------------------------------------------------
 # Tjänster kopplad till kontrakt
 # -------------------------------------------------------------------------------------------------
+
 class ContractServices(Base):
     __tablename__ = "contract_services"
-    __table_args__ = {"extend_existing": True}  # ✅ Fixar problemet
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
-    
-    member = Column(Boolean, default=False)
-    userdoc = Column(Boolean, default=False)
-    todo = Column(Boolean, default=False)
-    postit = Column(Boolean, default=False)
-    inbound = Column(Boolean, default=False)
+    id = Column(Integer, primary_key=True, index=True)
+    contract_id = Column(Integer, ForeignKey("contracts.contract_id"), nullable=False)
+    member = Column(Boolean)
+    userdoc = Column(Boolean)
+    todo = Column(Boolean)
+    postit = Column(Boolean)
+    inbound = Column(Boolean)
+    survey = Column(Boolean)
+
     contract = relationship("Contract", back_populates="services")
-    survey = Column(Boolean, default=False)
-    
+
     class Config:
-        from_attributes = True  # Säkerställer kompatibilitet med Pydantic
+        from_attributes = True
     
 # --------------------------------------
 # Eknonomiska transaktioner företag Model
@@ -150,15 +152,15 @@ class PostIt(Base):
     __tablename__ = "postit_notes"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=False)
-    created_at = Column(DateTime, default=func.now())
-    text = Column(Text, nullable=False)
-    
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    contract_id = Column(Integer, nullable=False)
+    note = Column(Text)  # nu är både Python och DB rena
+    created_at = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"))
+
     user = relationship("User", back_populates="postits")
-    
+
     class Config:
-        from_attributes = True  # Ersätt orm_mode med detta
+        from_attributes = True # Ersätt orm_mode med detta
         
 # ---------------------------------------------------------------------------
 # Hanterar Att Göra
@@ -168,7 +170,7 @@ class Todo(Base):
     __tablename__ = "todo"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
+    contract_id = Column(Integer, ForeignKey("contracts.contract_id"), nullable=False)
     name = Column(String(255), nullable=False)  # Rubrik
     text = Column(Text, nullable=True)  # Beskrivning
     progress = Column(Enum("ej påbörjad", "påbörjad", "avslutad", name="progress_enum"), default="ej påbörjad", nullable=False)
@@ -180,7 +182,7 @@ class Todo(Base):
     finished = Column(Boolean, default=False, nullable=False)
 
     contract = relationship("Contract", back_populates="todos")
-    tasks = relationship("Task", back_populates="todo", cascade="all, delete-orphan")   
+    tasks = relationship("Task", backref="todo", cascade="all, delete-orphan")   
 
     class Config:
         from_attributes = True
@@ -193,21 +195,18 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    todo_id = Column(Integer, ForeignKey("todo.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    title = Column(String(255), nullable=False)  # Rubrik
-    text = Column(Text, nullable=True)  # Instruktion/Beskrivning
-    progress = Column(Integer, default=0, nullable=False)  # % färdigt (0–100)
-    start_date = Column(Date, nullable=True)
-    end_date = Column(Date, nullable=True)
-    created_at = Column(DateTime, server_default=func.now())
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)    
+    todo_id = Column(Integer, ForeignKey("todo.id"), nullable=False)
 
-    todo = relationship("Todo", back_populates="tasks")
-    user = relationship("User", back_populates="tasks", foreign_keys=[user_id])
-    reports = relationship("TaskReport", back_populates="task", cascade="all, delete-orphan")
+    title = Column(String(255), nullable=False)
+    text = Column(Text, nullable=True)
+    due_date = Column(DateTime, nullable=True)
+    completed = Column(Boolean, default=False)
+
+    user = relationship("User", back_populates="tasks")    
 
     class Config:
-        from_attributes = True 
+        from_attributes = True
 
 # ---------------------------------------------------------------------------
 # Hanterar task-reports so är häng till tasks
@@ -218,11 +217,11 @@ class TaskReport(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="SET NULL"), nullable=True)
     report_text = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
-    task = relationship("Task", back_populates="reports")
+    task = relationship("Task", backref="reports")
     user = relationship("User")
 
     class Config:
@@ -231,8 +230,6 @@ class TaskReport(Base):
 # -----------------------------------------------------------
 # hanterar min tjänster
 # -----------------------------------------------------------
-
-Base = declarative_base()
 
 class ServiceRequest(Base):
     __tablename__ = "service_requests"
@@ -259,9 +256,8 @@ class Usecase(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    # FK till user & kontrakt
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="SET NULL"), nullable=True)
+    contract_id = Column(Integer, ForeignKey("contracts.contract_id", ondelete="CASCADE"), nullable=False)
 
     created_date = Column(Date, default=date.today, nullable=False)
     username = Column(String(100), nullable=False)
@@ -271,7 +267,12 @@ class Usecase(Base):
     critical = Column(Text, nullable=True)
     errors = Column(Text, nullable=True)
     unused_data = Column(Text, nullable=True)
-    feedback_time = Column(String(50), nullable=True)
+
+    feedback_time = Column(
+        ENUM("omedelbart", "inom timmar", "inom dagar", "aldrig riktigt säkert", name="feedback_enum"),
+        nullable=True
+    )
+
     accounting = Column(Text, nullable=True)
     erp_system = Column(String(100), nullable=True)
 
@@ -280,5 +281,3 @@ class Usecase(Base):
 
     class Config:
         from_attributes = True
-
-

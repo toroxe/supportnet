@@ -13,7 +13,7 @@ router = APIRouter()
 # 📌 Pydantic-modell för kontrakt
 # -----------------------
 class ContractPayload(BaseModel):
-    id:Optional[int] = None
+    contract_id: Optional[int] = None  # 🔁 Ändrat från id
     company_name: str
     ref_person: str
     email: str
@@ -27,10 +27,9 @@ class ContractPayload(BaseModel):
     registration_date: Optional[datetime] = None  # Hanteras av DB
     status: bool = True  # Default = Aktivt kontrakt
     services: List[dict] = []  # 🔥 Nytt! Gör att services alltid finns
-        
+
     class Config:
         from_attributes = True
-
 
 # -----------------------
 # 📌 Hämta alla kontrakt och alla tjänster
@@ -41,7 +40,7 @@ def get_all_contracts(db: Session = Depends(get_db)):
 
     return [
         ContractPayload(
-            id=contract.id,
+            contract_id=contract.contract_id,
             company_name=contract.company_name,
             status=contract.status,
             ref_person=contract.ref_person,
@@ -72,13 +71,13 @@ def get_all_contracts(db: Session = Depends(get_db)):
 # -------------------------
 @router.get("/contracts/{contract_id}", response_model=ContractPayload)
 def get_contract_by_id(contract_id: int, db: Session = Depends(get_db)):
-    contract = db.query(Contract).options(joinedload(Contract.services)).filter(Contract.id == contract_id).first()
+    contract = db.query(Contract).options(joinedload(Contract.services)).filter(Contract.contract_id == contract_id).first()
     
     if not contract:
         raise HTTPException(status_code=404, detail="Kontraktet hittades inte")
     
     return ContractPayload(
-        id=contract.id,
+        contract_id=contract.contract_id,
         company_name=contract.company_name,
         status=contract.status,
         ref_person=contract.ref_person,
@@ -137,7 +136,7 @@ def create_contract(payload: ContractPayload, db: Session = Depends(get_db)):
             print("🔹 Lägger till tjänst:", service)  # 🔥 Debug-logg
 
             new_service = ContractServices(
-                contract_id=new_contract.id,  # 🔥 ID:t är nu tillgängligt!
+                contract_id=new_contract.contract_id,  # 🔥 ID:t är nu tillgängligt!
                 member=service.get("member", False),
                 userdoc=service.get("userdoc", False),
                 todo=service.get("todo", False),
@@ -152,14 +151,14 @@ def create_contract(payload: ContractPayload, db: Session = Depends(get_db)):
     else:
         print("⚠️ Inga tjänster att spara.")
 
-    return {"message": "Kontrakt + tjänster skapade", "id": new_contract.id, "status": new_contract.status}
+    return {"message": "Kontrakt + tjänster skapade", "id": new_contract.contract_id, "status": new_contract.status}
 
 # -----------------------
 # 📌 Uppdatera kontrakt
 # -----------------------
 @router.put("/contracts/{contract_id}")
 def update_contract(contract_id: int, payload: ContractPayload, db: Session = Depends(get_db)):
-    contract = db.query(Contract).filter(Contract.id == contract_id).first()
+    contract = db.query(Contract).filter(Contract.contract_id == contract_id).first()
     if not contract:
         raise HTTPException(status_code=404, detail="Kontraktet hittades inte")
 
@@ -179,10 +178,10 @@ def update_contract(contract_id: int, payload: ContractPayload, db: Session = De
     db.commit()
     db.refresh(contract)
 
-    print("✅ Kontrakt uppdaterat:", contract_id)
+    print("✅ Kontrakt uppdaterat:", contract.contract_id)
 
     # ✅ Ta bort gamla tjänster innan vi lägger till nya
-    db.query(ContractServices).filter(ContractServices.contract_id == contract_id).delete()
+    db.query(ContractServices).filter(ContractServices.contract.contract_id == contract.contract_id).delete()
     db.commit()
 
     # ✅ Lägg till nya tjänster – här rättar vi till strukturen
@@ -190,7 +189,7 @@ def update_contract(contract_id: int, payload: ContractPayload, db: Session = De
         for service in payload.services:
             if isinstance(service, dict):  # 🔥 Säkerställ att det är en dict
                 new_service = ContractServices(
-                    contract_id=contract.id,
+                    contract_id=contract.contract_id,
                     member=service.get("member", False),
                     userdoc=service.get("userdoc", False),
                     todo=service.get("todo", False),
@@ -205,46 +204,55 @@ def update_contract(contract_id: int, payload: ContractPayload, db: Session = De
         db.commit()
         print("✅ Alla tjänster uppdaterade!")
 
-    return {"message": "Kontrakt + tjänster uppdaterade", "id": contract.id, "status": contract.status}
+    return {"message": "Kontrakt + tjänster uppdaterade", "id": contract_id, "status": contract.status}
 
 # -----------------------
 # 📌 Radera kontrakt (om vi behåller den)
 # -----------------------
 @router.delete("/contracts/{contract_id}")
 def delete_contract(contract_id: int, db: Session = Depends(get_db)):
-    contract = db.query(Contract).filter(Contract.id == contract_id).first()
+    contract = db.query(Contract).filter(Contract.contract_id == contract_id).first()
 
     if not contract:
         raise HTTPException(status_code=404, detail="Kontraktet hittades inte")
 
-    # 🔥 Flytta användare till ett standardföretag ("Default Company")
-    users = db.query(User).filter(User.company_name == contract.company_name).all()
+    # 🔥 Flytta användare till standardkontrakt (ID 1)
+    users = db.query(User).filter(User.contract_id == contract.contract_id).all()
     for user in users:
-        user.company_name = "Default Company"  # 🔄 Flytta användaren till ett default-företag
+        user.contract_id = 1  # 🔄 Flytta användaren till default-kontrakt
 
     db.delete(contract)
     db.commit()
 
-    return {"message": f"Kontrakt {contract_id} raderat och användare flyttade"}
+    return {"message": f"Kontrakt {contract.contract_id} raderat och användare flyttade till standardkontrakt"}
 
 # -------------------------------------------------------------------------------
 # Hämtar användare från user-tabellen
 # -------------------------------------------------------------------------------
-@router.get("/contracts/{company_name}/users")
-def get_users_for_contract(company_name: str, db: Session = Depends(get_db)):
-    users = db.query(User).filter(User.company_name == company_name, User.active == True).all()
+@router.get("/contracts/{contract_id}/users")
+def get_users_for_contract(contract_id: int, db: Session = Depends(get_db)):
+    users = db.query(User).filter(User.contract_id == contract_id, User.active == True).all()
 
     if not users:
         raise HTTPException(status_code=404, detail="Inga aktiva användare hittades för detta kontrakt")
 
-    return [{"id": u.id, "name": f"{u.c_name} {u.s_name}", "email": u.email, "rights": u.rights, "active": u.active} for u in users]
+    return [
+        {
+            "id": u.user_id,
+            "name": f"{u.c_name} {u.s_name}",
+            "email": u.email,
+            "rights": u.rights,
+            "active": u.active
+        }
+        for u in users
+    ]
 
 # -------------------------------------------------------------------------------
 # Sparar redigerad användardata till DB
 # -------------------------------------------------------------------------------
-@router.put("/contracts/{company_name}/users/{user_id}")
-def update_user(user_id: int, user_data: dict, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
+@router.put("/contracts/{contract_id}/users/{user_id}")
+def update_user(contract_id: int, user_id: int, user_data: dict, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id, User.contract_id == contract_id).first()
 
     if not user:
         raise HTTPException(status_code=404, detail="Användare ej hittad")
@@ -258,16 +266,26 @@ def update_user(user_id: int, user_data: dict, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    return {"message": "Användare uppdaterad", "user": user}
+    return {"message": "Användare uppdaterad", "user": {
+        "user_id": user.user_id,
+        "name": f"{user.c_name} {user.s_name}",
+        "email": user.email,
+        "rights": user.rights,
+        "active": user.active
+    }}
 
 # -------------------------------------------------------------------------------
 # Hämtar och returnerar alla company_names
 # -------------------------------------------------------------------------------
-@router.get("/contracts/names")  # 🔥 Ändrat till en mer standardiserad path
+@router.get("/contracts/names")
 def get_contract_names(db: Session = Depends(get_db)):
-    contracts = db.query(Contract.company_name).all()
+    contracts = db.query(Contract.contract_id, Contract.company_name).all()
 
     if not contracts:
-        raise HTTPException(status_code=404, detail="Inga kontraktsnamn hittades")
+        raise HTTPException(status_code=404, detail="Inga kontrakt hittades")
 
-    return [c[0] for c in contracts]  # 🔥 Packa om från list of tuples till en ren lista
+    return [
+        {"contract_id": c.contract_id, "company_name": c.company_name}
+        for c in contracts
+    ]
+

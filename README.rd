@@ -90,3 +90,13 @@ Nästa steg i utvecklingen:
 Dokumentera eventuella manuella ändringar som görs på servern och överväg hur detta ska integreras i framtida CI/CD-processer.
 
 Den här dokumentationen gör det lättare att iterera och skala upp projektet, samtidigt som den minimerar potentiella problem och missförstånd under utvecklingen. 😊
+
+# I Contract
+services = relationship("ContractServices", back_populates="contract", uselist=False)
+
+# I ContractServices
+contract_id = Column(Integer, ForeignKey("contracts.contract_id"), unique=True, nullable=False)
+contract = relationship("Contract", back_populates="services")
+
+services = db.query(ContractServices).filter(ContractServices.contract_id == contract_id).first()
+

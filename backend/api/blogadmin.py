@@ -36,7 +36,7 @@ async def create_blogpost(
     likes: int = Form(0),
     contact_link: str = Form(...),
     is_advertisement: bool = Form(False),
-    company_name: str = Form(None),  # Valfritt kontraktsnamn
+    contract_id: int = Form(...),  # Valfritt kontraktsnamn
     image: UploadFile = None,
     db: Session = Depends(get_db),
 ):
@@ -63,7 +63,7 @@ async def create_blogpost(
         likes=likes,
         contact_link=contact_link,
         is_advertisement=is_advertisement,
-        company_name=company_name,
+        contract_id=contract_id,
         image_url=file_url,
     )
     try:
@@ -84,7 +84,7 @@ async def update_blogpost(
     likes: int = Form(0),
     contact_link: str = Form(...),
     is_advertisement: bool = Form(False),
-    contract_name: str = Form(None),  # Lägg till kontraktsnamn
+    contract_id: int = Form(...),  # Lägg till kontraktsnamn
     image: UploadFile = None,
     db: Session = Depends(get_db),
 ):
@@ -119,7 +119,8 @@ async def update_blogpost(
         post.likes = likes
         post.contact_link = contact_link
         post.is_advertisement = is_advertisement
-        post.contract_name = contract_name  # Uppdatera kontraktsnamnet
+        post.contract_id = contract_id  
+        # Uppdatera kontraktsnamnet
 
         db.commit()
         db.refresh(post)

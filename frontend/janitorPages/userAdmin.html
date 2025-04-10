@@ -24,7 +24,7 @@
         <!--Sorterings funktion-->
         <div class="row mb-3">
             <div class="col">
-                <select id="searchContract" class="form-select" onchange="filterUsers()">
+                <select id="filterContract" class="form-select" onchange="filterUsers()">
                     <option value="">Alla Kontrakt</option>
                     <!-- Dynamisk rendering av kontrakt görs i JS -->
                 </select>
@@ -57,7 +57,7 @@
                     <th>Åtgärder</th>
                 </tr>
             </thead>
-            <tbody id="userTable">
+            <tbody id="userTableBody">
                 <!-- Dynamisk data renderas här -->
             </tbody>
         </table>
@@ -73,7 +73,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Formulär -->
-                    <form id="userForm">
+                    <form id="userForm" autocomplete="off">
                         <input type="hidden" id="userId">
                         <div class="mb-3">
                             <label for="company_name" class="form-label">Kontrakt</label>
@@ -91,25 +91,25 @@
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">E-post</label>
-                            <input type="email" class="form-control" id="email" required>
+                            <input type="email" class="form-control" id="email" required autocomplete="off">
                         </div>
                         <div class="mb-3">
                             <label for="role" class="form-label">Roll</label>
                             <select class="form-select" id="role">
-                                <option value="PROSPECT">PROSPECT</option>
-                                <option value="QUALIFIED_PROSPECT">QUALIFIED_PROSPECT</option>
-                                <option value="CUSTOMER">CUSTOMER</option>
-                                <option value="SUPPLIER">SUPPLIER</option>
-                                <option value="ADMIN">ADMIN</option>
-                                <option value="DROPPED">DROPPED</option>
+                                <option value="PROSPECT">Prospect</option>
+                                <option value="QUALIFIED_PROSPECT">Kvalificerat prospeckt</option>
+                                <option value="CUSTOMER">Kund</option>
+                                <option value="SUPPLIER">Leverantör</option>
+                                <option value="ADMIN">Administratör</option>
+                                <option value="DROPPED">Avslutad</option>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label for="status" class="form-label">Status</label>
                             <select class="form-select" id="status">
-                                <option value="PROSPECT" selected>PROSPECT</option>
-                                <option value="ACTIVE">ACTIVE</option>
-                                <option value="INACTIVE">INACTIVE</option>
+                                <option value="PROSPECT" selected>Prospect</option>
+                                <option value="ACTIVE">Aktiv</option>
+                                <option value="INACTIVE">Inaktiverad</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -122,7 +122,7 @@
                         </div>                                       
                         <div class="mb-3">
                             <label for="password" class="form-label">Lösenord</label>
-                            <input type="password" class="form-control" id="password">
+                            <input type="password" class="form-control" id="password" autocomplete="new-password">
                         </div>
                     </form>
                 </div>

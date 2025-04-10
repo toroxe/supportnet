@@ -31,41 +31,52 @@ window.initUserSession = async function () {
 
     const token = sessionStorage.getItem("authToken");
     const userDataRaw = sessionStorage.getItem("userData");
-    console.log("i min RÅA",userDataRaw)
-
-    console.log("📦 sessionStorage:", Object.fromEntries(Object.entries(sessionStorage)));
 
     if (!token || !userDataRaw) {
-        sessionStorage.clear();
+        // 🔐 Rensa auth-relaterade nycklar
+        sessionStorage.removeItem("authToken");
+        sessionStorage.removeItem("userData");
+        sessionStorage.removeItem("user");
+        sessionStorage.removeItem("contract_id");
+
         window.location.href = "../auth/userLogin.html";
         return false;
     }
 
     let username = "Vän";
+    let contract_id = null;
 
     try {
         const userData = JSON.parse(userDataRaw);
-        if (userData && userData.c_name) {
+
+        if (userData.c_name) {
             username = userData.c_name;
             sessionStorage.setItem("user", username);
         }
 
-        if (!sessionStorage.getItem("contract_id") && userData.contract) {
-            sessionStorage.setItem("contract_id", userData.contract);
-            console.log("🔁 Återställde contract_id från userData:", userData.contract);
+        if (userData.contract_id) {
+            contract_id = userData.contract_id;
+            if (!sessionStorage.getItem("contract_id")) {
+                sessionStorage.setItem("contract_id", contract_id);
+                console.log("🔁 Återställde contract_id från userData:", contract_id);
+            }
         }
+
     } catch (e) {
         console.warn("⚠️ Kunde inte tolka userData:", e);
     }
+
+    console.log("📦 sessionStorage:", Object.fromEntries(Object.entries(sessionStorage)));
 
     await loadHeader(username);
     return true;
 };
 
+
 // ------------------------------------------------------------
 // 📌 Kör automatiskt när DOM är redo
 // ------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", async () => {
+/*document.addEventListener("DOMContentLoaded", async () => {
     console.log("📌 userStandard – DOM redo, init startar");
     const ok = await initUserSession();
     if (!ok) return;
@@ -73,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const contractId = sessionStorage.getItem("contract_id");
     console.log("Kontrakts _ID:",contractId )
 
-});
+});*/
 
 
 

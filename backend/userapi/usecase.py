@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from backend.db.database import get_db
 from backend.db.models import Usecase
 from pydantic import BaseModel
+from enum import Enum as PyEnum
 from datetime import date
 
 router = APIRouter()
@@ -10,7 +11,13 @@ router = APIRouter()
 # ------------------------------
 # 📦 Pydantic-modell för indata
 # ------------------------------
-class UsecasePayload(BaseModel):
+class FeedbackTimeEnum(PyEnum):
+    omedelbart = "omedelbart"
+    inom_timmar = "inom timmar"
+    inom_dagar = "inom dagar"
+    aldrig_riktigt_säkert = "aldrig riktigt säkert"
+
+class UsecasePayload(BaseModel): 
     user_id: int
     contract_id: int
     username: str
@@ -21,12 +28,13 @@ class UsecasePayload(BaseModel):
     critical: str | None = None
     errors: str | None = None
     unused_data: str | None = None
-    feedback_time: str | None = None
+    feedback_time: FeedbackTimeEnum | None = None
     accounting: str | None = None
     erp_system: str | None = None
 
     analysis: str | None = None
     suggestions: str | None = None
+
 
 # ------------------------------
 # 🚀 POST /usecase

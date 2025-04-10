@@ -53,12 +53,12 @@ async def submit_service(payload: ServiceForm, db: Session = Depends(get_db)):
 
     await send_info_email(
         email=payload.email,
-        subject="Tack för din intresseanmälan",
+        subject="Tack för ditt intresse",
         message=generate_message(payload),
         attachment=get_attachment_name(payload.service_choice)
     )
 
-    return {"message": "Tjänst registrerad och bekräftelse skickad."}
+    return {"message": "Tjänst registrerad och informationen skickad."}
 
 # ✏️ Uppdatera befintlig användares tjänst
 @router.patch("/update-service")
@@ -95,12 +95,14 @@ async def update_service(payload: ServiceForm, db: Session = Depends(get_db)):
 # 🧠 Enkel text för e-postmeddelandet
 def generate_message(payload: ServiceForm) -> str:
     return f"""
-En ny tjänsteförfrågan har inkommit!
+Hej!
 
-Tjänst: {payload.service_choice.capitalize()}
-Namn: {payload.name}
-Företag: {payload.company}
-E-post: {payload.email}
+Här kommer lite mer information om tjänsten: {payload.service_choice.capitalize()}. 
+Om du finner den intressant så låt mig veta, så berätta mer.
+
+Med vänliga hälsningar
+
+//Tord
 """
 
 # 📎 Hämta rätt fil att bifoga

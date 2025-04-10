@@ -68,7 +68,7 @@ async def send_contact_email(
     """
     subject = f"Kontaktförfrågan från {name}"
     body = f"Namn: {name}\nE-post: {email}\nMeddelande:\n{message}"
-    response = send_email(subject, body, "tord.oxelgren@gmail.com")
+    response = await send_email(subject, body, "tord.oxelgren@gmail.com")
     if "error" in response:
         raise HTTPException(status_code=500, detail=response["error"])
     return JSONResponse(content=response, status_code=200)

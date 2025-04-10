@@ -7,23 +7,13 @@ let users = [];
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("janitor.js loaded");
 
-    // Ladda användardata och rendera i tabellen samt fyller dropdwon
-    //const users = await fetchUsers();
-    //console.log(users);
-    //renderUsers(users);
-    fetchCompanyNames();
+    const response = await fetch(`${BASE_URL}/contracts`);
+    const contracts = await response.json();
 
-    // Event listener för att öppna modal för att lägga till ny användare
-    const addUserButton = document.getElementById("addUserButton");
-    if (addUserButton) {
-        addUserButton.addEventListener("click", () => openUserModal());
-    }
-
-    // Event listener för att spara användare
-    const saveUserButton = document.getElementById("saveUserButton");
-    if (saveUserButton) {
-        saveUserButton.addEventListener("click", saveUser);
-    }
+    document.querySelector("#searchUser").addEventListener("input", filterUsers);
+    populateContractDropdown(contracts);        // ✅ Skicka rätt objekt nu
+    populateContracts();                        // dropdown i adminfiltret
+    await fetchUsers();                         // användare
 });
 
 // -----------------------------------------------------------------
@@ -32,15 +22,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function fetchUsers() {
     try {
         const response = await fetch(`${BASE_URL}/users`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
         const users = await response.json();
-        console.log("Hämtade användare:", users);
+        console.log("detta direkt från Maria:",users);
+        if (!Array.isArray(users)) {
+            console.warn("❌ Backend returnerade felmeddelande:", users?.error || users);
+            return;
+        }
+
         renderUsers(users);
     } catch (error) {
-        console.error("Fel vid hämtning av användare:", error);
-        alert("Fel vid hämtning av användare: " + error);
+        console.error("🔥 Kunde inte hämta användare:", error);
     }
 }
 
@@ -88,12 +79,8 @@ async function fetchCompanyNames() {
 // -----------------------------------------------------------------
 // Funktion: Rendera kontrakt i dropdown för användarformulär
 // -----------------------------------------------------------------
-function populateContractDropdown(companyNames) {
-    console.log(companyNames);
-    if (!Array.isArray(companyNames) || companyNames.length === 0) {
-        console.warn("⚠️ populateContractDropdown fick ogiltiga data:", companyNames);
-        return;
-    }
+function populateContractDropdown(contracts) {
+    console.log("Detta från drop renderingen", contracts);
 
     const contractDropdown = document.querySelector("#company_name");
     if (!contractDropdown) {
@@ -103,10 +90,10 @@ function populateContractDropdown(companyNames) {
 
     contractDropdown.innerHTML = "<option value=''>Välj kontrakt</option>";
 
-    companyNames.forEach(contractName => {
+    contracts.forEach(contract => {
         const option = document.createElement("option");
-        option.value = contractName;
-        option.textContent = contractName;
+        option.value = contract.contract_id;              // 🟢 Det vi sparar
+        option.textContent = contract.company_name;       // 🟡 Det vi visar
         contractDropdown.appendChild(option);
     });
 
@@ -117,56 +104,79 @@ function populateContractDropdown(companyNames) {
 // Rendera användardata
 // ----------------------------------------------------------------
 function renderUsers(users) {
-    console.log(users)
-    if (!Array.isArray(users)) {
-        console.error("renderUsers fick ingen giltig array:", users);
+    if (!Array.isArray(users) || users.length === 0) {
+        console.warn("⚠️ renderUsers fick ogiltig array:", users);
         return;
     }
-    const userTable = document.getElementById("userTable");
-    userTable.innerHTML = "";
+
+    const userTableBody = document.querySelector("#userTableBody");
+    if (!userTableBody) {
+        console.error("❌ #userTableBody hittades inte i DOM!");
+        return;
+    }
+
+    userTableBody.innerHTML = ""; // töm tidigare innehåll
+    console.log("Detta är min user", users);
     users.forEach(user => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${user.id}</td>
-            <td>${user.company_name}</td>
-            <td>${user.c_name} ${user.s_name}</td>
+            <td>${user.id ?? "saknas"}</td>
+            <td>${user.company_name ?? "saknas"}</td>
+            <td>${user.full_name ?? "saknas"}</td>
             <td>${user.email}</td>
             <td>${user.status}</td>
             <td>${user.role}</td>
             <td>${user.rights}</td>
             <td>
-                <button class="btn btn-warning btn-sm" onclick="editUser(${user.id})">Redigera</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Radera</button>
+                <button class="btn btn-warning btn-sm">Redigera</button>
+                <button class="btn btn-danger btn-sm">Radera</button>
             </td>
         `;
-        userTable.appendChild(row);
+            // Koppla redigera-knappen
+        row.querySelector(".btn-warning").addEventListener("click", () => {
+            editUser(user.id);
+        });
+
+        row.querySelector(".btn-danger").addEventListener("click", () => {
+            deleteUser(user.id);
+        });    
+
+        userTableBody.appendChild(row);
     });
+
 }
 
 // -----------------------------------------------------------------
 // Funktion: Öppna modal för att skapa eller redigera användare
 // -----------------------------------------------------------------
 async function openUserModal(user = null) {
-    populateContracts();  // ✅ Laddar kontraktslistan
+    // 🔄 Hämta kontrakt till dropdownen
+    const response = await fetch(`${BASE_URL}/contracts`);
+    const contracts = await response.json();
+    populateContractDropdown(contracts); // 🟢 Fyll dropdownen
 
-    console.log("🔍 Användardata till modalen:", user); // Debug
+    console.log("🔍 Användardata till modalen:", user);
 
-    // Dela upp namnet i förnamn & efternamn
-    let nameParts = user?.name?.split(" ") || ["", ""];  
-    let firstName = nameParts.slice(0, -1).join(" ");  // Allt utom sista ordet
-    let lastName = nameParts.slice(-1).join(" ");      // Sista ordet blir efternamn
+    // 🧠 Förnamn + Efternamn
+    let nameParts = user?.name?.split(" ") || ["", ""];
+    let firstName = nameParts.slice(0, -1).join(" ");
+    let lastName = nameParts.slice(-1).join(" ");
 
-    document.querySelector("#userModalLabel").textContent = user ? "Redigera Användare" : "Ny Användare";
-    document.querySelector("#userId").value = user?.id || "";
-    document.querySelector("#company_name").value = user?.company_name || "";
-    document.querySelector("#firstName").value = firstName;
-    document.querySelector("#lastName").value = lastName;
-    document.querySelector("#email").value = user?.email || "";
-    document.querySelector("#role").value = user?.role || "CUSTOMER";
-    document.querySelector("#status").value = user?.status || "ACTIVE";
-    document.querySelector("#accessLevel").value = user?.rights || "NONE";
-    document.querySelector("#password").value = ""; // Lösenord ska alltid vara tomt vid redigering
+    // ⏳ Vänta tills dropdownen har fyllts
+    setTimeout(() => {
+        document.querySelector("#userModalLabel").textContent = user ? "Redigera Användare" : "Ny Användare";
+        document.querySelector("#userId").value = user?.id || "";
+        document.querySelector("#company_name").value = user?.contract_id || "";
+        document.querySelector("#firstName").value = firstName;
+        document.querySelector("#lastName").value = lastName;
+        document.querySelector("#email").value = user?.email || "";
+        document.querySelector("#role").value = user?.role || "CUSTOMER";
+        document.querySelector("#status").value = user?.status || "ACTIVE";
+        document.querySelector("#accessLevel").value = user?.rights || "NONE";
+        document.querySelector("#password").value = "";
+    }, 150); // Lite extra buffert så dropdownen hinner klart
 
+    // 🪄 Visa modal
     const userModal = new bootstrap.Modal(document.querySelector("#userModal"));
     userModal.show();
 }
@@ -185,21 +195,15 @@ async function saveUser() {
     const status = document.querySelector("#status")?.value || "";
     const password = document.querySelector("#password")?.value || null;
     const rights = document.querySelector("#accessLevel")?.value || "";
-    const contractName = document.querySelector("#company_name")?.value || "";
+    const contractId = parseInt(document.querySelector("#company_name")?.value || "0");
 
-    // 🟢 Ny variabel för att hålla det gamla lösenordet
-    let originalPassword = document.querySelector("#password").getAttribute("data-original") || null;
-
-    console.log("✅ Formdata:", { userId, firstName, lastName, email, role, status, rights, contractName, password, originalPassword });
-
-    if (!firstName || !lastName || !email) {
-        console.error("❌ Saknade fält i formuläret!", { firstName, lastName, email });
-        alert("Alla fält måste fyllas i!");
+    if (!firstName || !lastName || !email || !contractId) {
+        alert("❌ Alla fält måste fyllas i – inklusive kontrakt!");
         return;
     }
 
-    // 🟢 Om användaren INTE fyllt i ett nytt lösenord, behåll det gamla
-    let passwordToSend = password ? password : originalPassword;
+    const originalPassword = document.querySelector("#password").getAttribute("data-original") || null;
+    const passwordToSend = password ? password : originalPassword;
 
     const userData = {
         id: userId ? parseInt(userId) : null,
@@ -208,10 +212,10 @@ async function saveUser() {
         email: email,
         role: role,
         status: status,
-        password_hash: password ? password : originalPassword, // Använd befintligt lösenord om inget nytt anges
+        password_hash: passwordToSend,
         rights: rights,
-        company_name: contractName,
-        active: true // Säkerställ att active alltid finns
+        contract_id: contractId,
+        active: true
     };
 
     console.log("🚀 Skickar följande payload till backend:", userData);
@@ -223,7 +227,7 @@ async function saveUser() {
         const response = await fetch(url, {
             method: method,
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(userData),
+            body: JSON.stringify(userData)
         });
 
         if (!response.ok) {
@@ -232,9 +236,14 @@ async function saveUser() {
 
         alert("✅ Användaren sparades!");
         fetchUsers();  // Uppdatera listan
+
+        const userModalEl = document.querySelector("#userModal");
+        const userModal = bootstrap.Modal.getInstance(userModalEl);
+        if (userModal) userModal.hide();  // 🧼 Ta bort hela modal & dimma
+
     } catch (error) {
         console.error("❌ Fel vid sparande av användare:", error);
-        alert("Fel vid sparande av användare: " + error);
+        alert("Det gick inte att spara användaren. Försök igen.\n" + error.message);
     }
 }
 
@@ -244,7 +253,11 @@ async function saveUser() {
 async function deleteUser(id) {
     if (confirm("Är du säker på att du vill radera denna användare?")) {
         try {
-            const response = await fetch(`${BASE_URL}/users/${id}`, { method: "DELETE" });
+            const response = await fetch(`${BASE_URL}/users/${id}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" }
+            });
+            
             if (!response.ok) {
                 throw new Error(`Kunde inte radera användare: ${response.status}`);
             }
@@ -285,35 +298,44 @@ async function editUser(id) {
 // Funktion: Populera kontraktsfiltret dynamiskt
 // -----------------------------------------------------------------
 async function populateContracts() {
-    const contractDropdown = document.querySelector("#searchContract");
+    const contractDropdown = document.querySelector("#filterContract"); // ✅ korrekt ID för adminfiltret
+    if (!contractDropdown) {
+        console.error("❌ Kan inte hitta #filterContract i DOM!");
+        return;
+    }
+
     contractDropdown.innerHTML = '<option value="">Alla Kontrakt</option>'; // Reset dropdown
-    
+
     try {
         const response = await fetch(`${BASE_URL}/contracts`);
         if (!response.ok) throw new Error(`Fel vid hämtning av kontrakt: ${response.status}`);
 
         const contracts = await response.json();
-        contracts.forEach(contract => {
+        const companyNames = contracts.map(contract => contract.company_name);
+
+        companyNames.forEach(contractName => {
             const option = document.createElement("option");
-            option.value = contract.company_name;
-            option.textContent = contract.company_name;
+            option.value = contractName;
+            option.textContent = contractName;
             contractDropdown.appendChild(option);
         });
+
+        console.log("✅ Admin-kontraktsfilter uppdaterat:", companyNames);
     } catch (error) {
-        console.error("Fel vid hämtning av kontrakt:", error);
+        console.error("❌ Fel vid hämtning av kontrakt:", error);
     }
-    await populateContractDropdown(); // Ladda kontrakt i dropdown vid sidstart 
 }
 
 // -----------------------------------------------------------------
 // Funktion: Filtrera användare baserat på sökfälten
 // -----------------------------------------------------------------
 function filterUsers() {
-    const contractFilter = document.querySelector("#searchContract").value.toLowerCase();
+    const contractFilter = document.querySelector("#filterContract").value.toLowerCase();
     const userFilter = document.querySelector("#searchUser").value.toLowerCase();
     const roleFilter = document.querySelector("#searchRole").value.toLowerCase();
 
-    document.querySelectorAll("#userTable tr").forEach(row => {
+    // Fel selektor:
+    document.querySelectorAll("#userTableBody tr").forEach(row => {
         const contract = row.children[1]?.textContent.trim().toLowerCase() || "";
         const user = row.children[2]?.textContent.trim().toLowerCase() || "";
         const role = row.children[5]?.textContent.trim().toLowerCase() || "";
@@ -328,18 +350,33 @@ function filterUsers() {
     });
 }
 
+//---------------------------------------------------------------------
+// Tömmer alla fält inna skapa ny
+//--------------------------------------------------------------------
+function resetUserForm() {
+    document.querySelector("#userModalLabel").textContent = "Ny användare";
+    document.querySelector("#userId").value = "";
+    document.querySelector("#company_name").value = "";
+    document.querySelector("#firstName").value = "";
+    document.querySelector("#lastName").value = "";
+    document.querySelector("#email").value = "";
+    document.querySelector("#role").value = "CUSTOMER";
+    document.querySelector("#status").value = "ACTIVE";
+    document.querySelector("#accessLevel").value = "NONE";
+    document.querySelector("#password").value = "";
+    document.querySelector("#password").setAttribute("data-original", "");
+}
+
 // -----------------------------------------------------------------
 // Koppla sökning till fälten
 // -----------------------------------------------------------------
-document.querySelector("#searchContract").addEventListener("change", filterUsers);
+document.querySelector("#filterContract").addEventListener("change", filterUsers);
 document.querySelector("#searchUser").addEventListener("input", filterUsers);
 document.querySelector("#searchRole").addEventListener("change", filterUsers);
 
-// -----------------------------------------------------------------
-// Ladda kontrakt och användare vid start
-// -----------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", async () => {
-    await populateContracts();
-    await fetchUsers();
-    populateContractDropdown();
+document.querySelector("#addUserButton").addEventListener("click", () => {
+    resetUserForm();             // 🧼 töm fälten
+    openUserModal(null);        // 📦 öppna tom modal
 });
+
+document.querySelector("#saveUserButton").addEventListener("click", saveUser);
