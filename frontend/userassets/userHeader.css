@@ -1,0 +1,48 @@
+.dashboard-header {
+    background-color: #222; /* Mörkare än huvudsidans blå */
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    height: 60px;  /* Sätter höjden till en smal banner */
+}
+
+/* userHeader.css */
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    width: 50px;  /* Standardstorlek */
+    height: auto;
+    transition: width 0.3s ease;
+    background-color: aliceblue;
+}
+
+/* Responsiv anpassning för små skärmar */
+@media screen and (max-width: 768px) {
+    .dashboard-header {
+        height: 50px;  /* Smalare banner på mobil */
+    }
+    
+    .logo-img {
+        display: none; /* Dölj hästen på små skärmar */
+    }
+    
+    .dashboard-header h2 {
+        font-size: 1.1rem; /* Anpassad storlek */
+    }
+    
+    .dashboard-header .btn-warning {
+        font-size: 0.8rem;
+        padding: 5px 8px;
+        width: auto;
+    }
+}
+

@@ -1,0 +1,11 @@
+.expanded .full-text {
+    display: block;
+}
+
+.expanded .preview {
+    display: none;
+}
+
+.full-text {
+    display: none; /* Bör vara gömd från början */
+}

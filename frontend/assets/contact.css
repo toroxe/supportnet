@@ -1,0 +1,113 @@
+.contact-form {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: rgba(253, 246, 227, 0.9); /* Gul-transparent bakgrund */
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.contact-form h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.contact-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #0056b3;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.contact-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #0056b3;
+    color: #fff;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.contact-form button:hover {
+    background-color: #003d80;
+}
+
+/* För att säkerställa rätt sökväg för loggan */
+.header-logo {
+    background-image: url("../pics/logo.png"); /* Uppdatera sökvägen om den är fel */
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 150px; /* Anpassa storlek */
+    height: 50px;
+    display: block;
+    margin: 0 auto; /* Centrerad logga */
+}
+
+.overlay {
+    background-color: rgba(253, 246, 227, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.overlay h1 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.overlay p {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: #4b5563;
+}
+
+@media screen and (max-width: 600px) {
+    .contact-form {
+    margin: 20px 10px;
+    padding: 15px;
+}
+
+.contact-form h1 {
+    font-size: 1.5rem;
+}
+
+.contact-form label {
+    font-size: 0.9rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+    font-size: 0.95rem;
+    padding: 8px;
+}
+
+.contact-form button {
+    font-size: 1rem;
+    padding: 10px;
+}
+
+.overlay h1 {
+    font-size: 1.8rem;
+}
+
+.overlay p {
+    font-size: 1rem;
+}
+}

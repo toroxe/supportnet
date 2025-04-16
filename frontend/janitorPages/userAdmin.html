@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Användaradministration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/styles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Användaradministration</h1>
+    </header>
+
+    <main class="container mt-4">
+        <!-- Toppsektion med knapp -->
+        <div class="d-flex justify-content-between mb-3">
+            <h2>Alla användare</h2>
+            <button type="button" id="addUserButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">Lägg till ny</button>
+        </div>
+        
+        <!--Sorterings funktion-->
+        <div class="row mb-3">
+            <div class="col">
+                <select id="filterContract" class="form-select" onchange="filterUsers()">
+                    <option value="">Alla Kontrakt</option>
+                    <!-- Dynamisk rendering av kontrakt görs i JS -->
+                </select>
+            </div>
+            <div class="col">
+                <input type="text" id="searchUser" class="form-control" placeholder="Sök Användare (Wildcard)">
+            </div>
+            <div class="col">
+                <select id="searchRole" class="form-select" onchange="filterUsers()">
+                    <option value="">Alla Roller</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="CUSTOMER">Kund</option>
+                    <option value="SUPPLIER">Leverantör</option>
+                    <option value="PROSPECT">Prospekt</option>
+                </select>
+            </div>
+        </div>                
+        
+        <!-- Användartabell -->
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Kontrakt</th> <!-- Ny rubrik -->
+                    <th>Namn</th>
+                    <th>E-post</th>
+                    <th>Status</th>
+                    <th>Roll</th>
+                    <th>Rättigheter</th>
+                    <th>Åtgärder</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- Dynamisk data renderas här -->
+            </tbody>
+        </table>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Ny användare</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulär -->
+                    <form id="userForm" autocomplete="off">
+                        <input type="hidden" id="userId">
+                        <div class="mb-3">
+                            <label for="company_name" class="form-label">Kontrakt</label>
+                            <select class="form-select" id="company_name">
+                                <!-- Dynamisk rendering av kontrakt -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">Förnamn</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Efternamn</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-post</label>
+                            <input type="email" class="form-control" id="email" required autocomplete="off">
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Roll</label>
+                            <select id="searchRole" class="form-select" onchange="filterUsers()">
+                                <option value="">Alla Roller</option>
+                                <option value="Administratör">Administratör</option>
+                                <option value="Kund">Kund</option>
+                                <option value="Leverantör">Leverantör</option>
+                                <option value="Prospekt">Prospekt</option>
+                                <option value="Kvalificerad">Kvalificerad</option>
+                                <option value="Avslutad">Avslutad</option>
+                            </select>                            
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status">
+                                <option value="PROSPECT" selected>Prospect</option>
+                                <option value="ACTIVE">Aktiv</option>
+                                <option value="INACTIVE">Inaktiverad</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="accessLevel" class="form-label">Rättigheter</label>
+                            <select id="accessLevel" class="form-select">
+                                <option value="NONE">Inga</option>
+                                <option value="READ">Läsrättigheter</option>
+                                <option value="WRITE">Skriv- och läsrättigheter</option>
+                            </select>
+                        </div>                                       
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Lösenord</label>
+                            <input type="password" class="form-control" id="password" autocomplete="new-password">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Stäng</button>
+                    <button type="button" id="saveUserButton" class="btn btn-primary">Spara</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../jscripts/janitor.js"></script>
+
+</body>
+</html>
+

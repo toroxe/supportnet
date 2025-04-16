@@ -1,0 +1,176 @@
+/* Behåll huvudpanelen tydlig och läsbar */
+.contract-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 30px auto;
+    max-width: 900px;
+}
+
+/* Rubriker för sektioner */
+.section-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+/* Justera inputfält */
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 8px;
+}
+
+/* Checkbox-stil */
+.checkbox-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.checkbox-container label {
+    background: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.checkbox-container input:checked + label {
+    background: #0056b3;
+}
+
+/* Användarlistning */
+.user-list {
+    background: rgba(240, 240, 240, 0.9);
+    padding: 10px;
+    border-radius: 5px;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+/* Stil för att ge sektionerna en tydligare bakgrund */
+.contract-section {
+    background: rgba(255, 255, 255, 0.9); /* Halvtransparent vit bakgrund */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 15px;
+}
+
+/* Anpassning för varje kolumn */
+.left-column, .middle-column, .right-column {
+    background: rgba(255, 255, 255, 0.95); /* Lätt genomskinlig vit bakgrund */
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Tydligare bakgrund för användarlistan */
+.user-list {
+    background: rgba(240, 240, 240, 0.95);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Stäng-knappen */
+.close-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.close-btn:hover {
+    background: darkred;
+}
+
+.contract-container {
+    background: rgba(255, 255, 255, 0.9); /* Lätt vit bakgrund för läsbarhet */
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.section-box {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h4 {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.form-control {
+    margin-bottom: 10px;
+}
+.row.mt-3 {
+    width: 100%;
+    max-width: 1500px; /* Justera vid behov */
+    margin: 0 auto;
+}
+/* Justerar bredd och minskar luft */
+.container {
+    max-width: 90%; /* Gör sektionen bredare */
+    margin: auto;
+    padding: 20px;
+}
+
+/* Banner högst upp */
+.banner {
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 5px 5px 0 0;
+}
+
+/* Anpassar innehåll */
+.section-content {
+    background: rgba(255, 255, 255, 0.9); /* Lätt vit bakgrund */
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Justerar rader */
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Anpassar inputboxar */
+.form-control {
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+/* Justera checkboxarna och texterna i linje */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Mellanrum mellan checkbox och text */
+    font-size: 1rem;
+}
+
+.checkbox-label input {
+    width: 18px;
+    height: 18px;
+}
+
+
+

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Att göra</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- jQuery UI -->
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+    <!-- Touch Punch (för att fixa touch-stöd) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+
+    <!-- Anpassad CSS -->
+    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="../userassets/todo.css">
+    <link rel="stylesheet" href="../userassets/userHeader.css">
+
+</head>
+<body>
+    <!-- Header -->
+    <div id="header-placeholder"></div>
+
+    <main class="container mt-4">
+        <h1 class="text-white text-center">Att göra</h1>
+        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#todoModal">Ny att göra</button>
+        
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Ej påbörjad</th>
+                    <th>Under genomförande</th>
+                    <th>Avslutad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="todoNotStarted"></td>
+                    <td id="todoInProgress"></td>
+                    <td id="todoCompleted"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+    </main>
+
+<!-- Modal för att skapa ny To-Do -->
+<div class="modal fade" id="todoModal" tabindex="-1" aria-labelledby="todoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="todoModalLabel">Skapa ny att göra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="todoForm">
+                    <input type="hidden" id="todoId">
+                    <div class="mb-3">
+                        <label for="todoName" class="form-label">Titel</label>
+                        <input type="text" class="form-control" id="todoName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="todoText" class="form-label">Beskrivning</label>
+                        <textarea class="form-control" id="todoText"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="todoPriority" class="form-label">Prioritet</label>
+                        <select class="form-select" id="todoPriority">
+                            <option value="låg">Låg</option>
+                            <option value="medel">Medel</option>
+                            <option value="hög">Hög</option>
+                        </select>
+                        <div class="mb-3">
+                            <label for="todoStatus" class="form-label">Status</label>
+                            <select class="form-select" id="todoStatus">
+                                <option value="ej planerad">Ej planerad</option>
+                                <option value="planerad">Planerad</option>
+                                <option value="enligt plan">Enligt plan</option>
+                                <option value="fördröjd">Fördröjd</option>
+                                <option value="avbruten">Avbruten</option>
+                                <option value="arbete avslutat">Arbete avslutat</option>
+                                <option value="fakturerad">Fakturerad</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="todoProgress" class="form-label">Progress</label>
+                            <select class="form-select" id="todoProgress">
+                                <option value="ej påbörjad">Ej påbörjad</option>
+                                <option value="påbörjad">Påbörjad</option>
+                                <option value="avslutad">Avslutad</option>
+                            </select>
+                        </div>                                                                       
+                    </div>
+                    <div class="mb-3">
+                        <label for="todoBeginDate" class="form-label">Startdatum</label>
+                        <input type="date" class="form-control" id="todoBeginDate">
+                    </div>                    
+                    <div class="mb-3">
+                        <label for="todoDueDate" class="form-label">Deadline</label>
+                        <input type="date" class="form-control" id="todoDueDate">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="todoFinished">
+                        <label class="form-check-label" for="todoFinished">Avslutad</label>
+                    </div>
+                    <button id="planeraTodoButton" class="btn btn-success mt-2">Planera</button>
+                    <br><br>
+                    <button type="submit" class="btn btn-success w-100">Spara</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Bootstrap Script + JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="../userscripts/todo.js" defer></script>
+</body>
+</html>

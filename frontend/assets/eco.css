@@ -1,0 +1,160 @@
+/* Stil för Ekonomi-appen */
+.btn-lg {
+    width: 700px;
+    height: 60px;
+}
+
+.status-circle {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between; /* Sprid rubrik och meny horisontellt */
+    align-items: center; /* Justera vertikalt för att centrera */
+    padding: 0 20px; /* Lägg till lite utrymme på sidorna */
+}
+
+.hamburger-menu {
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: auto; /* Tvinga hamburgaren till höger */
+}
+
+/* Justera layouten för header */
+.d-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.left-space {
+    flex: 1; /* Lämnar tomt utrymme till vänster */
+}
+
+.header-title {
+    flex: 2; /* Mitten: Rubrik */
+    text-align: center;
+}
+
+.header-menu {
+    flex: 1; /* Höger: Meny */
+    text-align: right;
+}
+
+h1 {
+    font-size: 24px;
+    margin: 0;
+    line-height: 1.5; /* Anpassa linjehöjd för centering */
+}
+
+#eco-menu {
+    z-index: 1000; /* Hög prioritet */
+    position: absolute; /* Säkerställ att den flyttas utanför flödet */
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+}
+
+#eco-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#eco-menu ul li {
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+#eco-menu ul li a {
+    text-decoration: none;
+    color: black;
+    font-size: 16px;
+}
+
+#eco-menu ul li:last-child {
+    border-bottom: none;
+}
+
+.hidden {
+    display: none !important; /* Se till att Bootstrap inte påverkar */
+}
+
+/* Anpassad modal-stil för transaktioner */
+.modal-content {
+    border-radius: 8px;
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+
+.table-responsive {
+    max-height: 300px; /* Begränsa höjd för mobilvänlighet */
+    overflow-y: auto;
+}
+
+/* För små skärmar, under 768px */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column; /* Ställ rubrik och meny vertikalt */
+        align-items: flex-start;
+        padding: 10px;
+    }
+    .hamburger-menu {
+        position: static;
+        margin-top: 10px;
+    }
+    .summary {
+        font-size: 14px;
+        padding: 10px;
+    }
+    .status-circle {
+        width: 15px;
+        height: 15px;
+        margin-left: 5px;
+    }
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .btn-lg {
+        width: 100%;
+        height: auto;
+        font-size: 16px;
+    }
+    #eco-menu ul li {
+        padding: 8px 10px;
+    }
+}
+
+/* För mycket små skärmar, under 576px */
+@media (max-width: 576px) {
+    h1 {
+        font-size: 20px;
+        text-align: center;
+    }
+    .summary {
+        font-size: 12px;
+    }
+    .btn-lg {
+        font-size: 14px;
+    }
+    #eco-menu {
+        padding: 5px 0;
+    }
+    #eco-menu ul li {
+        font-size: 14px;
+    }
+}
+
+

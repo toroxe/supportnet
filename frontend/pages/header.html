@@ -1,0 +1,53 @@
+<header class="bg-primary text-white">
+    <div class="container d-flex justify-content-between align-items-center py-2">
+        <a href="../index.html" class="d-flex align-items-center text-white text-decoration-none">
+            <div class="logo-container me-2">
+                <img src="../assets/pics/logga.png?v=1" alt="MySupportNet logga ai" class="logo-img">
+            </div>
+            <span class="logo"><span class="highlight">M</span>y<span class="highlight">S</span>upport<span class="highlight">N</span>et</span>
+        </a>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">               
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.html">Hem</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/blog.html">Blogg</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/services.html">Tjänster</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/about.html">Om oss</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/contact.html">Kontakt</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/regform.html">Testa</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../auth/userLogin.html">Logga in</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </div>
+        </nav>
+        
+    </div>       
+   
+</header>
+
+<script>
+    if (window.location.pathname.endsWith('/auth/userLogin.html')) {
+      history.replaceState({}, '', '/login');
+    }
+  </script>
+  

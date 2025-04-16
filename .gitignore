@@ -1,0 +1,37 @@
+backend/venv/
+# Sandbox & dokumenthantering
+frontend/sandbox.html
+backend/db/sandbox.json
+backend/db/mydocs/
+# Python cache och miljö
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+venv/
+env/
+
+# Systemfiler
+.DS_Store
+Thumbs.db
+
+# IDE-filer
+.vscode/
+.idea/
+
+# Loggar och temporära filer
+*.log
+*.bak
+*.tmp
+
+# Projektinterna filer (de vi just tog bort)
+DB20241206.txt
+LinuxServerProjektet.txt
+attGåVidare.txt
+newThread.txt
+sammnfattning.txt
+# Skydda CL
+frontend/jscripts/t.js
+jsconfig.json
+
+

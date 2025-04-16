@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrera Kontrakt</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Egen CSS -->
+    <link rel="stylesheet" href="../assets/contract.css">
+    <link rel="stylesheet" href="../assets/styles.css">
+</head>
+
+<body>
+    <div class="banner">
+        Hantera kontrakt     
+    </div>     
+        
+    <div class="container mt-4 contract-container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Kontraktsinformation</h2>
+            <div class="d-flex justify-content-end gap-2 mb-3">
+                <button class="btn btn-secondary" onclick="closeContractForm()">Stäng</button>
+                <button class="btn btn-success" onclick="saveContract()">Spara</button>
+            </div>            
+        </div>
+
+        <div class="row mt-3">
+            <!-- Vänster sektion: Företagsinformation -->
+            <div class="col-md-4 border-end section-box">
+                <h4 id="contractTitle">Företagsinformation</h4>
+                
+
+                <form>
+                    <label for="companyNub">Kundnummer:</label>
+                    <input type="text" id="companyNub" class="form-control" readonly>
+
+                    <label for="companyName">Företagsnamn:*</label>
+                    <input type="text" id="companyName" class="form-control" required>
+
+                    <div class="form-group">
+                        <label for="industry_id">Bransch</label>
+                        <select id="industry_id" class="form-control">
+                        <option value="">Välj bransch...</option>
+                        <!-- JS fyller i alternativen dynamiskt -->
+                        </select>
+                    </div>                                            
+
+                    <div class="form-group">
+                        <label for="contractStatus">Status</label>
+                        <select id="contractStatus" class="form-control">
+                            <option value="true">Aktiv</option>
+                            <option value="false">Inaktiv</option>
+                        </select>
+                    </div>
+                    
+                    <label for="refPerson">Kontaktperson:*</label>
+                    <input type="text" id="refPerson" class="form-control" required>
+                    
+                    <label for="email">E-post:*</label>
+                    <input type="email" id="email" class="form-control" required>
+                    
+                    <label for="phone">Telefon:</label>
+                    <input type="text" id="phone" class="form-control">
+                    
+                    <label for="zip">Postnummer:</label>
+                    <input type="text" id="zip" class="form-control">
+                    
+                    <label for="address">Adress:</label>
+                    <input type="text" id="address" class="form-control">
+
+                    <label for="city">Stad:</label>
+                    <input type="text" id="city" class="form-control">
+                    
+                    <label for="creditAssessed">Kreditvärdering:</label>
+                    <select id="creditAssessed" class="form-control">
+                        <option>Ja</option>
+                        <option>Nej</option>
+                    </select>
+                    <div class="form-group">
+                        <label for="payCond"><strong>Betalningsvillkor:</strong></label>
+                        <select id="payCond" class="form-control">
+                            <option value="10 dagar netto" selected>10 dagar netto</option>
+                            <option value="30 dagar netto">30 dagar netto</option>
+                        </select>
+                    </div>  
+                    <div class="form-group">
+                        <label for="invoiceModel"><strong>Fakturamodell:</strong></label>
+                        <select id="invoiceModel" class="form-control">
+                            <option value="Papper" selected>Papper</option>
+                            <option value="PDF">PDF</option>
+                            <option value="Elektronisk">Elektronisk</option>
+                            <option value="Swish">Swish</option>
+                        </select>
+                    </div>
+                    <label for="registrationDate">Registreringsdatum:</label>
+                    <input type="date" id="registrationDate" class="form-control">
+                </form>
+            </div>
+  
+            <div class="col-md-4 border-end section-box">
+                <h4>Tjänster</h4>
+                <div id="services">
+                    <div class="form-group">
+                        <label class="checkbox-label"><input type="checkbox" id="survey"> Analys</label>
+                        <label class="checkbox-label"><input type="checkbox" id="member"> Medlemsregister</label>
+                        <label class="checkbox-label"><input type="checkbox" id="userdoc"> Dokumenthantering</label>
+                        <label class="checkbox-label"><input type="checkbox" id="todo"> Todo</label>
+                        <label class="checkbox-label"><input type="checkbox" id="postit"> Anslagstavla</label>
+                        <label class="checkbox-label"><input type="checkbox" id="inbound"> Inbound Marketing</label>
+                    </div>
+                </div>    
+            </div>
+
+            <!-- Höger sektion: Användare knutna till kontraktet -->
+            <div class="col-md-4">
+                <div class="card mt-3 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0 text-dark">Användare kopplade till kontraktet</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-striped">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Namn</th>
+                                    <th>Rättigheter</th>
+                                    <th>Åtgärder</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Dynamisk rendering av användare sker här -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+   
+    <!-- Modal för att redigera användare -->
+    <div id="userModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Redigera användare</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="userId">
+                    <label for="userName">Namn:</label>
+                    <input type="text" id="userName" class="form-control" disabled>
+
+                    <label for="userEmail">E-post:</label>
+                    <input type="email" id="userEmail" class="form-control" disabled>
+
+                    <label for="userRights">Rättigheter:</label>
+                    <select id="userRights" class="form-control">
+                        <option value="NONE">Ingen</option>
+                        <option value="READ">Läs</option>
+                        <option value="WRITE">Skriv</option>
+                    </select>
+
+                    <label for="userActive">Status:</label>
+                    <select id="userActive" class="form-control">
+                        <option value="1">Aktiv</option>
+                        <option value="0">Inaktiv</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Stäng</button>
+                    <button type="button" class="btn btn-success" id="saveUserChanges">Spara</button>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <!-- jQuery först, sedan Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Ditt kontraktsskript -->
+    <script src="../jscripts/contract.js" defer></script>
+
+</body>
+</html>
+
+
+

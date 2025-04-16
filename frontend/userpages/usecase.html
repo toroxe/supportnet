@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>Use Case – Verksamhetsanalys</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Typsnitt -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Egna stilar -->
+    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="../userassets/usecase.css">
+    <link rel="stylesheet" href="../userassets/userHeader.css">
+</head>
+
+<body class="usecase-body">
+    <!-- Header laddas dynamiskt -->
+    <div id="header-placeholder"></div>
+
+    <!-- Banner om du vill -->
+    <!-- <div class="usecase-banner"><img src="../assets/pics/banner.jpg" alt="Bannerbild"></div> -->
+
+    <main>
+        <section class="usecase-form-section">
+            <h1>Underlag för verksamhetsanalys</h1>
+            <p id="contractDisplay">[contract_id kommer här]</p>
+
+            <form action="/api/usecase" method="post">
+                <!-- Ditt formulär oförändrat -->
+                <label title="T.ex. ett steg i processen som alltid tar för lång tid, krånglar eller orsakar irritation.">
+                    1. Vad är den mest frustrerande delen av er process?
+                </label>
+                <textarea name="frustration" rows="4" required></textarea>
+
+                <label title="Moment där tid eller resurser används utan att bidra till slutresultatet. Tänk slöseri eller 'onödigt jobb'.">
+                    2. Vilka moment känns som slöseri med tid?
+                </label>
+                <textarea name="waste" rows="4"></textarea>
+
+                <label title="Vilken del är kritisk för att processen ska lyckas, men samtidigt ömtålig, manuell eller felbenägen?">
+                    3. Vilken del är mest kritisk – men också mest sårbar?
+                </label>
+                <textarea name="critical" rows="4"></textarea>
+
+                <label title="Återkommande fel, brist på tydlighet, informationsmissar eller ansvar som faller mellan stolar.">
+                    4. Finns det återkommande fel eller missförstånd?
+                </label>
+                <textarea name="errors" rows="4"></textarea>
+
+                <label title="T.ex. kunddata, tidloggar, mätvärden eller rapporter som inte aktivt används i beslut eller uppföljning.">
+                    5. Samlar ni in data som inte används?
+                </label>
+                <textarea name="unused_data" rows="4"></textarea>
+
+                <label title="Hur snabbt ni får signal om att något inte fungerar i processen. Ju tidigare, desto bättre kontroll.">
+                    6. Hur snabbt får ni veta om något gått fel?
+                </label>
+                <select name="feedback_time">
+                    <option value="omedelbart">Omedelbart</option>
+                    <option value="inom timmar">Inom timmar</option>
+                    <option value="inom dagar">Inom dagar</option>
+                    <option value="aldrig riktigt säkert">Aldrig riktigt säkert</option>
+                </select>
+
+                <label title="Exempelvis via bokföringsbyrå, internt i Excel, Fortnox, Visma eller annat.">
+                    7. Hur sker er redovisning idag?
+                </label>
+                <textarea name="accounting" rows="3"></textarea>
+
+                <label title="T.ex. Visma, Fortnox, Business Central, SAP, Jeeves, Pyramid – eller inget alls.">
+                    8. Vilket affärssystem använder ni?
+                </label>
+                <input type="text" name="erp_system">
+
+                <label>Datum för upprättande</label>
+                <input type="date" name="created_date">
+
+                <label>Upprättad av</label>
+                <input type="text" name="username" readonly>
+
+                <div class="form-check form-switch my-4">
+                    <input class="form-check-input" type="checkbox" role="switch" id="surveyToggle">
+                    <label class="form-check-label fs-5" for="surveyToggle">Visa analys och förslag</label>
+                </div>                               
+
+                <div id="analysisBlock" style="display: none;">
+                    <label title="Sammanfattning av nuläget, orsaker till problem, och tolkning av indata.">
+                        🧠 Analys och slutsatser
+                    </label>
+                    <textarea name="analysis" rows="5"></textarea>
+
+                    <label title="Beskriv konkreta förbättringsförslag, eventuella besparingar eller vinster i tid, kvalitet eller pengar.">
+                        💡 Förbättringsförslag och besparingar
+                    </label>
+                    <textarea name="suggestions" rows="5"></textarea>
+                </div>
+
+                <button type="submit">Skicka in</button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../userscripts/userStandard.js" defer></script>
+    <script src="../userscripts/usecase.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+
+
+
+

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektadministration</title>
+    <link rel="stylesheet" href="../userassets/userHeader.css">
+    <link rel="stylesheet" href="../userassets/tasks_admin.css">
+    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main>
+        <h1 class="project-title">Projektplanering: <span id="todo-name">Laddar...</span></h1>
+        
+        <section class="project-info-container">
+            <h4>Projektbeskrivning</h4>
+            <p id="todo-description">Laddar...</p>            
+        </section>        
+        <section class="gantt-container">
+            <div class="gantt-grid">
+                <button id="add-task-btn" class="btn-add-task">Ny uppgift</button>
+                <!-- Här genereras cellerna dynamiskt -->
+            </div>                        
+            <div class="gantt-header">                
+                <div class="gantt-date-row" id="gantt-dates">
+                    <!-- Datum genereras dynamiskt -->
+                </div>
+            </div>
+            <div class="gantt-body">
+                <div class="gantt-tasks" id="gantt-tasks">
+                    <!-- Tasks och deras rader genereras här -->
+                </div>
+                <div class="gantt-grid" id="gantt-grid">
+                    <!-- Celler skapas dynamiskt här -->
+                </div>                
+            </div>
+        </section>        
+    </main>
+
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span id="close" class="close-btn">&times;</span>
+            
+            <div class="modal-body">
+                <!-- Formulärsektionen -->
+                <div class="modal-form">
+                    <h2>Ny uppgift</h2>
+                    
+                    <label for="task-title">Titel:</label>
+                    <input type="text" id="task-title" placeholder="Uppgiftens namn">
+                    
+                    <label for="task-desc">Beskrivning:</label>
+                    <textarea id="task-desc" placeholder="Beskriv uppgiften..."></textarea>
+    
+                    <label for="task-start">Startdatum:</label>
+                    <input type="date" id="task-start">
+    
+                    <label for="task-end">Slutdatum:</label>
+                    <input type="date" id="task-end">
+    
+                    <div class="modal-buttons">
+                        <button id="save-task-btn">Spara</button>
+                        <button id="report-btn">Rapport</button>
+                    </div>
+                </div>
+    
+                <!-- Rapportsektionen -->
+                <div class="modal-reports">
+                    <h2>Rapporter</h2>
+                    <div id="report-content">
+                        <p>Inga rapporter tillgängliga ännu...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>   
+
+    <script src="../userscripts/tasks_admin.js" defer></script>
+</body>
+</html>

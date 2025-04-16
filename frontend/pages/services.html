@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="../assets/services.css">
+    <link rel="stylesheet" href="../assets/header.css">
+    <link rel="stylesheet" href="../assets/footer.css">
+    <title>Tjänster</title>
+</head>
+<body>
+    <!-- Header -->
+    <div id="header-placeholder"></div>
+
+    <div class="overlay text-center py-5">
+        <h1>Våra Tjänster</h1>
+        <p class="lead font-weight-bold">AI när det är som bäst – skräddarsydda lösningar för framtidens företag.</p>
+    </div>
+
+    <!-- Tjänstesektioner -->
+    <main class="container mt-5">
+        <div class="row">
+            <!-- Sektion 1: Kunskap -->
+            <section class="col-md-6 mb-4">
+                <div class="service-section" id="ai_kunskap">
+                    <h2>Kunskap</h2>
+                    <p><b>AI när det är som bäst – Skräddarsydda workshops för din verksamhet</b><br>
+                        Våra workshops är designade för att ge dig praktisk och direkt tillämpbar kunskap om AI.
+                        Genom en kombination av teori och praktiska övningar hjälper vi dig att förstå hur 
+                        AI kan optimera din verksamhet. Få insikt i de senaste AI-verktygen och lär dig 
+                        hur du kan implementera dessa för att förbättra processer, minska kostnader och 
+                        skapa mervärde för dina kunder. <br>
+                        Vi ser till att du inte bara lär dig – du förstår och kan agera direkt.
+                    </p>
+                    <p><b>Beställ mer information i formuläret nedan</b></p>
+                </div>
+            </section>
+    
+            <!-- Sektion 2: Rådgivning -->
+            <section class="col-md-6 mb-4">
+                <div class="service-section" id="rådgivning">
+                    <h2>Rådgivning</h2>
+                    <p><b>Personlig vägledning – från AI-strategi till praktisk handling</b><br>
+                        Vår rådgivning är för dig som vill ta nästa steg med AI men behöver 
+                        vägledning på vägen. Vi börjar med ett kostnadsfritt uppstartssamtal där 
+                        vi kartlägger dina behov och mål. Utifrån det skapar vi en tydlig handlingsplan 
+                        med konkreta förslag – alltid anpassad efter din verksamhet. Efter varje samtal 
+                        får du en sammanställning med insikter och rekommendationer som tar dig närmare en 
+                        hållbar AI-struktur.
+                    </p>
+                    <p><b>Beställ mer information i formuläret nedan</b></p>
+                </div>
+            </section>
+        </div>
+    
+        <div class="row">
+            <!-- Sektion 3: Tjänster -->
+            <section class="col-md-6 mb-4">
+                <div class="service-section" id="tjänster">
+                    <h2>Tjänster</h2>
+                    <p><b>AI-drivna lösningar – skräddarsydd teknik för din tillväxt</b><br>
+                        Vi erbjuder tekniska tjänster som hjälper dig att nyttja kraften i AI där den 
+                        gör störst nytta. Genom vår Inbound Marketing-tjänst effektiviserar vi din marknadsföring 
+                        med smarta, automatiserade flöden. Vi bygger även specialanpassade AI-verktyg som 
+                        integreras i din verksamhet – från analys till kunddialog. Allt du behöver för att 
+                        spara tid, öka precisionen och skapa tillväxt.
+                    </p>
+                    <p><b>Beställ mer information i formuläret nedan</b></p>
+                </div>
+            </section>
+    
+            <!-- Sektion 4: IT & Allmänna frågor -->
+            <section class="col-md-6 mb-4">
+                <div class="service-section" id="it_allmänt">
+                    <h2>Allmänt om IT</h2>
+                    <p><b>Din digitala partner – oavsett fråga</b><br>
+                        IT är ett brett område, och du kanske har funderingar som inte direkt rör AI, men som ändå påverkar din digitala vardag. 
+                        Det kan handla om val av plattform, säkerhetsfrågor, digital arbetsmiljö, support eller strategi. 
+                        Oavsett vad du undrar över hjälper vi dig att hitta rätt lösning, med sunt förnuft, tydlig kommunikation och ett öga för framtiden.
+                    </p>
+                    <div class="mt-3 text-center">
+                        <a href="../pages/contact.html" class="btn btn-lg btn-primary fw-bold px-4">Kontakta oss</a>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>    
+
+    <!-- Form för val av tjänst -->
+    <div class="container mt-5">
+        <section id="service-options" class="service-section">
+            
+                <h2 class="text-center">Vill du veta mer? Välj här nere så kommer info till din mail</h2>
+            
+                <form id="servicesForm" class="mt-4">
+                <div class="radio-group">
+                    <label><input type="radio" name="service" value="kunskap" checked>Kunskap</label>
+                    <label><input type="radio" name="service" value="radgivning">Rådgivning</label>
+                    <label><input type="radio" name="service" value="tjanster">Tjänster</label>
+                </div>                      
+            
+                <div class="form-group">
+                    <label for="name">Namn</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="Ange ditt namn" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="company">Företag</label>
+                    <input type="text" id="company" name="company" class="form-control" placeholder="Ange ditt företag" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Ange din e-postadress" required>
+                </div>                
+            
+                <button type="submit" class="btn btn-success btn-lg btn-block mt-3">Skicka</button>
+                </form>
+                <div id="statusMessage" class="mt-3"></div>           
+        </section> 
+    </div>
+    <!-- Footer -->
+    <div id="footer-placeholder"></div>
+
+    <script src="../jscripts/render.js"></script>
+    <script type="module" src="../jscripts/services.js?v=1"></script>
+
+</body>
+</html>
+

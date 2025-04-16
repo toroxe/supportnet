@@ -1,0 +1,69 @@
+/* Generell styling för About-sidan */
+.about-page {
+    padding: 40px 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Styling för sektionerna på About-sidan */
+.about-section {
+    padding: 40px;
+    margin-bottom: 20px;
+    background-color: #fdf6e3 !important; /* Ljus, varm bakgrundsfärg */
+    border-radius: 10px; /* Rundade hörn */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Lätt skugga för visuell separation */
+}
+
+.about-section h1, .about-section h2 {
+    color: #333 !important; /* Ändrar färgen till svart */
+    font-weight: bold; /* Gör texten fet */
+    text-align: center; /* Centrera texten (om det behövs) */
+}
+
+
+.about-section p, .about-section ul {
+    color: #333;
+    text-align: justify;
+}
+
+/* Styling för sektionen "Vilka vi är" */
+#about-who .content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#about-who .image {
+    width: 50%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    #about-who .content {
+        flex-direction: column;
+    }
+
+    #about-who .image {
+        width: 100%;
+    }
+}
+
+.overlay {
+    background-color: rgba(253, 246, 227, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.overlay h1 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.overlay p {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: #4b5563;
+}
