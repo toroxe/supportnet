@@ -11,7 +11,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 # ============================================================
-# 🔐 KONFIGURATION FÖR SÄKERHET
+# 🔐 KONFIGURATION FÖR SÄKERHET och kloka beslut
 # ============================================================
 
 SECRET_KEY = "SUPPORTNET_SECRET_KEY"  # 🛡️ Byt ut till riktig hemlig nyckel!
