@@ -17,13 +17,11 @@
     <main class="container mt-4">
         <!-- Toppsektion med knapp -->
         <div class="d-flex justify-content-between mb-3 align-items-center">
-            <h2 class="m-0">Mina Kontrakt</h2>
-            <div class="d-flex gap-2">
-                <button type="button" class="btn btn-success rounded-pill px-4" id="openIndustryModalBtn">Välj bransch</button>
-                <button class="btn btn-success rounded-pill px-4" onclick="location.href='contract.html'">+ Lägg till Kontrakt</button>
-            </div>                      
+            <h2 class="m-0">Mina Kontrakt</h2>                      
         </div>        
         
+        <a href="contract.html" class="btn btn-success mb-3">+ Skapa nytt kontrakt</a>
+
         <!-- Kontraktstabell -->
         <table class="table table-striped table-bordered">
             <thead class="table-dark">
@@ -46,58 +44,8 @@
         </table>
     </main>
 
-    <!-- 🌟 Industry Modal -->
-    <div class="modal fade" id="industryModal" tabindex="-1" aria-labelledby="industryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content shadow-lg rounded-4">
-            <div class="modal-header bg-dark text-white d-flex justify-content-between align-items-center">
-                <h5 class="modal-title m-0" id="industryModalLabel">Skapa eller redigera bransch</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Stäng"></button>
-            </div>              
     
-            <div class="modal-body">
-            <div class="row">
-                <!-- Vänster kolumn -->
-                <div class="col-md-6 border-end pe-4">
-                <h6 class="mb-3">Mina Branscher</h6>
-                <div id="industry-list" class="list-group">
-                    <!-- Branscher laddas här via JS -->
-                    <!-- Varje rad får en Redigera-knapp -->
-                </div>
-                </div>
-    
-                <!-- Höger kolumn -->
-                <div class="col-md-6 ps-4">
-                <h6 class="mb-3">Branschformulär</h6>
-                <form onsubmit="submitIndustryForm(event)">
-                    <input type="hidden" id="industry-id-hidden">
-    
-                    <div class="mb-3">
-                    <label for="new-industry-name" class="form-label">Namn</label>
-                    <input type="text" class="form-control" id="new-industry-name" required>
-                    </div>
-                    <div class="mb-3">
-                    <label for="new-industry-note" class="form-label">Notering (valfritt)</label>
-                    <textarea class="form-control" id="new-industry-note" rows="2"></textarea>
-                    </div>
-                    <div class="form-check mb-3">
-                    <input type="checkbox" class="form-check-input" id="new-industry-active" checked>
-                    <label class="form-check-label" for="new-industry-active">Aktiv</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary rounded-pill">Spara</button>
-                </form>
-                </div>
-            </div>
-            </div>
-    
-            <div class="modal-footer">
-            <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Stäng</button>
-            </div>
-        </div>
-        </div>
-    </div>  
-
-    <script type="module" src="../jscripts/industryModal.js?v=1.3.2"></script>
+    <script type="module" src="../janitorScripts/contract.js"></script>
 
 </body>
 </html>

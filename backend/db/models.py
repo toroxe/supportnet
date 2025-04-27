@@ -137,7 +137,7 @@ class BlogPost(Base):
     __table_args__ = {'extend_existing': True}  # Viktigt för att undvika konflikt     
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    content = Column(String, nullable=False)
+    blogText = Column(String, nullable=False)
     likes = Column(Integer, default=0)
     contact_link = Column(String, nullable=False)
     is_advertisement = Column(Boolean, default=False)

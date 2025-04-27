@@ -50,7 +50,7 @@ function renderBlogPost(post) {
                 <div class="col-md-8">
                     <div class="card-body">
                         <h5 class="card-title text-center">${post.title}</h5>
-                        <p class="card-text">${post.content}</p>
+                        <p class="card-text">${post.blogText}</p>
                         <button class="btn btn-primary like-btn" data-id="${post.id}" ${post.liked ? "disabled" : ""}>
                             <i class="bi bi-hand-thumbs-up"></i> Gilla (${post.likes})
                         </button>
@@ -68,7 +68,7 @@ function renderAd(ad) {
             <img src="${ad.image_url}" class="card-img-top" alt="Blogginlägg: ${ad.title} – från MySupportNet">
             <div class="card-body">
                 <h5 class="card-title">${ad.title}</h5>
-                <p class="card-text">${ad.content}</p>
+                <p class="card-text">${ad.blogText}</p>
                 <a href="${ad.contact_link}" class="btn btn-warning" target="_blank">Kontakta</a>
             </div>
         </div>
@@ -113,7 +113,7 @@ function renderMobileView(posts, ads) {
                 <img src="${post.image_url}" alt="${post.title}" class="card-img-top">
                 <div class="card-body">
                     <h5 class="card-title">${post.title}</h5>
-                    <p class="card-content">${post.content}</p>
+                    <p class="card-content">${post.blogText}</p>
                     <button class="btn btn-primary like-btn" data-id="${post.id}" ${post.liked ? "disabled" : ""}>
                         <i class="bi bi-hand-thumbs-up"></i> Gilla (${post.likes})
                     </button>
@@ -130,7 +130,7 @@ function renderMobileView(posts, ads) {
                 <img src="${ad.image_url}" alt="${ad.title}" class="card-img-top">
                 <div class="card-body">
                     <h5 class="card-title">${ad.title}</h5>
-                    <p class="card-content">${ad.content}</p>
+                    <p class="card-content">${ad.blogText}</p>
                     <a href="${ad.contact_link}" class="btn btn-warning" target="_blank">Kontakta</a>
                 </div>
             </div>

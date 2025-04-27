@@ -18,13 +18,13 @@
         <!-- Toppsektion med knapp -->
         <div class="d-flex justify-content-between mb-3">
             <h2>Alla användare</h2>
-            <button type="button" id="addUserButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">Lägg till ny</button>
+            <button type="button" id="addUserButton" class="btn btn-primary">Lägg till ny</button>
         </div>
         
         <!--Sorterings funktion-->
         <div class="row mb-3">
             <div class="col">
-                <select id="filterContract" class="form-select" onchange="filterUsers()">
+                <select id="filterContract" class="form-select">
                     <option value="">Alla Kontrakt</option>
                     <!-- Dynamisk rendering av kontrakt görs i JS -->
                 </select>
@@ -33,7 +33,7 @@
                 <input type="text" id="searchUser" class="form-control" placeholder="Sök Användare (Wildcard)">
             </div>
             <div class="col">
-                <select id="searchRole" class="form-select" onchange="filterUsers()">
+                <select id="searchRole" class="form-select">
                     <option value="">Alla Roller</option>
                     <option value="ADMIN">Admin</option>
                     <option value="CUSTOMER">Kund</option>
@@ -95,15 +95,15 @@
                         </div>
                         <div class="mb-3">
                             <label for="role" class="form-label">Roll</label>
-                            <select id="searchRole" class="form-select" onchange="filterUsers()">
+                            <select id="modalRole" class="form-select">
                                 <option value="">Alla Roller</option>
-                                <option value="Administratör">Administratör</option>
-                                <option value="Kund">Kund</option>
-                                <option value="Leverantör">Leverantör</option>
-                                <option value="Prospekt">Prospekt</option>
-                                <option value="Kvalificerad">Kvalificerad</option>
-                                <option value="Avslutad">Avslutad</option>
-                            </select>                            
+                                <option value="ADMIN">Administratör</option>
+                                <option value="CUSTOMER">Kund</option>
+                                <option value="SUPPLIER">Leverantör</option>
+                                <option value="PROSPECT">Prospekt</option>
+                                <option value="QUALIFIED_PROSPECT">Kvalificerad</option>
+                                <option value="DROPPED">Avslutad</option>
+                            </select>                                                       
                         </div>
                         <div class="mb-3">
                             <label for="status" class="form-label">Status</label>
@@ -135,7 +135,7 @@
         </div>
     </div>
 
-    <script type="module" src="../jscripts/janitor.js"></script>
+    <script type="module" src="../janitorScripts/userAdmin.js"></script>
 
 </body>
 </html>

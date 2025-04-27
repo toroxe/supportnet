@@ -1,7 +1,10 @@
 //---------------------------------------------------------------
 // Min BASE Global
 //---------------------------------------------------------------
-export const BASE_URL = "https://my.supportnet.se/api";
+import { BASE_URL, ENDPOINTS } from "../myconfig.js";
+import * as IndustryModule from "../janitorScripts/industryModal.v1.2.js";
+
+console.log("🧪 Kontroll ENDPOINT:", ENDPOINTS?.industries);
 
 let contractIdGlobal = null;  // 🔥 Global variabel för ID
 let contractNameGlobal = null;
@@ -28,7 +31,7 @@ if (contractIdGlobal) {
 
     // 🔥 Hämta kontraktsdata och sätt contractNameGlobal
     try {
-        const response = await fetch(`${BASE_URL}/${contractIdGlobal}`);
+        const response = await fetch(ENDPOINTS.contracts);
         if (!response.ok) throw new Error("Servern svarade inte OK");
 
         const contract = await response.json();
@@ -43,11 +46,12 @@ if (contractIdGlobal) {
         console.log("📌 Kontrakt-ID identifierat:", contractIdGlobal);
         await loadContract();
     } catch (err) {
-        console.error("❌ Fel vid loadContract:", err);
+        console.error("❌ Fel vid loadContract:", err);        
     }
 
 } else {
     console.warn("⚠️ Inget giltigt contractIdGlobal hittat, skapar nytt kontrakt vid behov.");
+    await fillIndustryDropdown(); // Fyll dropdown även vid nytt kontrakt
 }
 
     // 🔥 Rendera användare DIREKT om contractNameGlobal finns
@@ -122,16 +126,17 @@ function renderContracts(contracts) {
 
     contracts.forEach(contract => {
         const row = document.createElement("tr");
+
         row.innerHTML = `
-            <td>${contract.contract_id}</td>
-            <td>${contract.company_name}</td>
-            <td>${contract._name || "Ej klassad"}</td> <!-- ✅ KORREKT! -->
-            <td>${contract.ref_person}</td>
-            <td>${contract.registration_date ? new Date(contract.registration_date).toLocaleDateString() : "Ej registrerad"}</td>
+            <td>${contract.contract_id || "-"}</td>
+            <td>${contract.company_name || "-"}</td>
+            <td>${contract.industry_name || "Ej klassad"}</td>
+            <td>${formatStatus(contract.status)}</td>
+            <td>${contract.ref_person || "-"}</td>
+            <td>${contract.registration_date ? new Date(contract.registration_date).toISOString().split("T")[0] : "-"}</td>
             <td>${contract.credit_assessed ? "Ja" : "Nej"}</td>
-            <td>${contract.email}</td>
-            <td>${contract.phone}</td>
-            <td>${contract.industry_name || ""}</td> <!-- 🔥 NY RAD! -->
+            <td>${contract.email || "-"}</td>
+            <td>${contract.phone || "-"}</td>
             <td>
                 <button class="btn btn-primary btn-sm editContract" data-id="${contract.contract_id}">Redigera</button>
                 <button class="btn btn-danger btn-sm deleteContract" data-id="${contract.contract_id}">Radera</button>
@@ -141,7 +146,16 @@ function renderContracts(contracts) {
         tableBody.appendChild(row);
     });
 
-    attachEditListeners(); // 🔥 Nu kopplar vi edit-knapparna
+    attachEditListeners(); // Koppla knappar
+}
+
+function formatStatus(status) {
+    switch (status) {
+        case "ACTIVE": return "Aktiv";
+        case "INACTIVE": return "Inaktiv";
+        case "PROSPECT": return "Prospect";
+        default: return "-";
+    }
 }
 
 // Lägg till event listeners på redigeringsknapparna
@@ -164,16 +178,19 @@ async function loadContract() {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}/${contractIdGlobal}`);
+        const response = await fetch(`${ENDPOINTS.contracts}/${contractIdGlobal}`);
         const contract = await response.json();
 
         console.log("✅ Kontrakt hämtat:", contract);
         contractNameGlobal = contract.company_name || "Okänt företag"; 
         console.log("🏢 Företagsnamn satt:", contractNameGlobal);
 
+        await fillIndustryDropdown(contract.industry_id);
+
         // ✅ Fyll i formuläret direkt
         document.querySelector("#companyNub").value = contract.contract_id || "";
         document.querySelector("#companyName").value = contract.company_name || "";
+        document.querySelector("#industry_id").value = contract.industry_id || "";
         document.querySelector("#contractStatus").value = contract.status.toString();
         document.querySelector("#refPerson").value = contract.ref_person || "";
         document.querySelector("#email").value = contract.email || "";
@@ -281,8 +298,8 @@ async function saveContract() {
 
     try {
         const method = contractId ? "PUT" : "POST";
-        const url = contractId ? `${BASE_URL}/contracts/${contractId}`
-                                : `${BASE_URL}/contracts`;
+        const url = contractId ? `${ENDPOINTS.contracts}/${contractId}`
+                        : `${ENDPOINTS.contracts}`;
 
         console.log(`${method === "PUT" ? "🔄 Uppdaterar" : "🆕 Skapar"} kontrakt...`);
         console.log("📦 Payload som skickas:", payload);
@@ -316,6 +333,8 @@ async function saveContract() {
 function closeContractForm() {
     window.location.href = "mycontracts.html";
 }
+window.closeContractForm = closeContractForm;
+window.saveContract = saveContract;
 
 //-------------------------------------------------------------------
 // 🔥 Funktion för att samla alla tjänster
@@ -439,7 +458,7 @@ async function updateContract(contractId) {
     console.log("📌 Payload som skickas i PUT:", payload);
 
     try {
-        const response = await fetch(`${BASE_URL}/contracts/${contractId}`, {
+        const response = await fetch(`${ENDPOINTS.contracts}/${contractIdGlobal}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -471,7 +490,7 @@ async function deleteContract(contractId) {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}/contracts/${contractId}`, {
+        const response = await fetch(`${ENDPOINTS.contracts}/${contractId}`, {
             method: "DELETE"
         });        
 
@@ -508,7 +527,7 @@ async function fetchAndRenderUsers() {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}/contracts/${contractIdGlobal}/users`);
+        const response = await fetch(`${ENDPOINTS.users.replace(":id", contractIdGlobal)}`);
         
         if (response.status === 404) {
             console.info("ℹ️ Inga användare kopplade till kontraktet ännu.");
@@ -607,7 +626,7 @@ async function saveUserChanges() {
     };
 
     try {
-        const response = await fetch(`${BASE_URL}/contracts/${contractIdGlobal}/users/${userId}`, {
+        const response = await fetch(`${ENDPOINTS.users.replace(":id", contractIdGlobal)}/${userId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -639,6 +658,33 @@ function validateContractForm() {
     }    
 
     return true; // Allt ser bra ut
+}
+
+//---------------------------------------------------
+// Skapar dropdown för bransch
+//---------------------------------------------------
+async function fillIndustryDropdown(selectedId = null) {
+    try {
+        const res = await fetch(ENDPOINTS.industries);
+        const industries = await res.json();
+
+        const dropdown = document.querySelector("#industry_id");
+        if (!dropdown) return;
+
+        dropdown.innerHTML = `<option value="1">Ej klassad</option>`;
+
+        industries.forEach(ind => {
+            const opt = document.createElement("option");
+            opt.value = ind.ind_id;
+            opt.textContent = ind.name;
+            if (selectedId && ind.ind_id == selectedId) {
+                opt.selected = true;
+            }
+            dropdown.appendChild(opt);
+        });
+    } catch (err) {
+        console.error("❌ Kunde inte ladda branscher:", err);
+    }
 }
 
 

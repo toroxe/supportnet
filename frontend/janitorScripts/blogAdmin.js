@@ -1,6 +1,7 @@
-const BASE_URL = "https://my.supportnet.se/api"; // Backend endpoint
+import { BASE_URL, ENDPOINTS } from "../myconfig.js"; // Backend endpoint
 let blogPosts = []; // Deklarera en global variabel för att lagra blogginlägg
 let isEditing = false; // Flagga för redigering
+let quill;
 
 // --------------------------------------
 // Säkerställer att DOM är laddad innan rendering
@@ -17,11 +18,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         addBlogButton.addEventListener("click", () => openBlogModal());
     }
 
-    // Event listener för att spara blogginlägg
-    const saveBlogButton = document.querySelector("#save-blog");
-    if (saveBlogButton) {
-        saveBlogButton.addEventListener("click", saveBlogPost);
-    }
+        quill = new Quill("#blog-text-editor", {
+        theme: "snow",
+        placeholder: "Skriv innehåll här...",
+    });
 
     // Hantera bilduppladdning och förhandsvisning
     const imageInput = document.querySelector("#blog-image-upload");
@@ -52,24 +52,25 @@ function handleImagePreview(event) {
 // --------------------------------------
 async function fetchBlogPosts() {
     try {
-        const response = await fetch(`${BASE_URL}/blogposts`);
+        const response = await fetch(ENDPOINTS.blogList);
         const data = await response.json();
 
-        // Logga resultatet för att inspektera det som hämtas
         console.log("Data från GET /blogposts:", data);
 
-        blogPosts = data; // Spara inläggen i den globala variabeln
+        blogPosts = data;
 
         const tableBody = document.querySelector("#blog-table-body");
         if (!tableBody) {
             throw new Error("Elementet med ID 'blog-table-body' saknas i DOM.");
         }
 
-        tableBody.innerHTML = ""; // Rensa tabellen först
+        tableBody.innerHTML = "";
+
         blogPosts.forEach(post => {
             tableBody.innerHTML += `
                 <tr>
                     <td>${post.id}</td>
+                    <td>${post.company_name || "-"}</td>
                     <td>${post.title}</td>
                     <td>${post.likes}</td>
                     <td>${post.is_advertisement ? "Ja" : "Nej"}</td>
@@ -94,7 +95,7 @@ function openBlogModal(post = null) {
     const modalTitle = document.querySelector("#blog-modal-label");
     const blogIdInput = document.querySelector("#blogId");
     const titleInput = document.querySelector("#blog-title");
-    const contentInput = document.querySelector("#blog-content");
+    const textInput = document.querySelector("#blog-text");
     const likesInput = document.querySelector("#blog-likes");
     const contactLinkInput = document.querySelector("#blog-contact-link");
     const advertisementInput = document.querySelector("#blog-is-advertisement");
@@ -106,10 +107,14 @@ function openBlogModal(post = null) {
         modalTitle.textContent = "Redigera Blogginlägg";
         blogIdInput.value = post.id;
         titleInput.value = post.title;
-        contentInput.value = post.content;
+        textInput.value = post.blogText;
         likesInput.value = post.likes;
         contactLinkInput.value = post.contact_link;
         advertisementInput.checked = post.is_advertisement;
+
+        loadContractDropdown(post.company_name);
+        document.querySelector("#blog-contract").value = post.company_name || "";
+
 
         // Rendera bilden om `image_url` finns
         if (post.image_url) {
@@ -122,7 +127,7 @@ function openBlogModal(post = null) {
         modalTitle.textContent = "Nytt Blogginlägg";
         blogIdInput.value = "";
         titleInput.value = "";
-        contentInput.value = "";
+        textInput.value = "";
         likesInput.value = 0;
         contactLinkInput.value = "";
         advertisementInput.checked = false;
@@ -138,41 +143,52 @@ function openBlogModal(post = null) {
 // Funktion: Spara blogginlägg (med stöd för image_url)
 // --------------------------------------
 async function saveBlogPost() {
-    const blogId = isEditing ? document.querySelector("#blogId").value : null;
+// 📝 Se till att Quill-editorns innehåll hamnar i input-fältet
+    const blogTextInput = document.querySelector("#blog-text");
+    if (quill && blogTextInput) {
+        blogTextInput.value = quill.root.innerHTML;
+    }   
+
     const title = document.querySelector("#blog-title").value;
-    const content = document.querySelector("#blog-content").value;
+    const blogText = document.querySelector("#blog-text").value;
     const likes = parseInt(document.querySelector("#blog-likes").value) || 0;
     const contactLink = document.querySelector("#blog-contact-link").value || "";
     const isAdvertisement = document.querySelector("#blog-is-advertisement").checked;
     const imageFile = document.querySelector("#blog-image-upload").files[0];
+    const companyName = document.querySelector("#blog-contract").value;
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
-    formData.append("likes", likes);
-    formData.append("contact_link", contactLink);
-    formData.append("is_advertisement", isAdvertisement);
-    if (imageFile) {
-        formData.append("image", imageFile);
+    if (!companyName || companyName === "") {
+        alert("Du måste välja ett giltigt kontrakt.");
+        return;
     }
 
-    const contractName = document.querySelector("#blog-contract").value || ""; // Hämta valt kontraktsnamn
-    formData.append("contract_name", contractName); // Lägg till i formdatan
-
-    const url = isEditing ? `${BASE_URL}/blogposts/${blogId}` : `${BASE_URL}/blogposts`;
-    const method = isEditing ? "PUT" : "POST";
-
     try {
-        const response = await fetch(url, { method, body: formData });
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("blogText", blogText);
+        formData.append("likes", likes);
+        formData.append("contact_link", contactLink);
+        formData.append("is_advertisement", isAdvertisement);
+        formData.append("company_name", companyName); // 🟢 Nyckeln som backend förväntar sig
+
+        if (imageFile) {
+            formData.append("image", imageFile);
+        }
+
+        const response = await fetch(ENDPOINTS.blogList, {
+            method: "POST",
+            body: formData,
+        });
+
         if (!response.ok) {
             throw new Error(await response.text());
         }
 
-        alert(isEditing ? "Blogginlägg uppdaterades!" : "Blogginlägg skapades!");
-        isEditing = false; // Återställ flaggan efter sparande
-        fetchBlogPosts();
+        alert("Blogginlägg skapades!");
+        bootstrap.Modal.getInstance(document.querySelector("#blog-modal")).hide();
+        fetchBlogPosts(); // 🔁 Ladda om gridden
     } catch (error) {
-        console.error("Fel vid spara:", error);
+        console.error("Fel vid spara:", error.message);
         alert("Misslyckades med att spara blogginlägget.");
     }
 }
@@ -180,18 +196,17 @@ async function saveBlogPost() {
 //---------------------------------------------------------------------
 // Öppnar redigeringsformuläret med existerande data
 //---------------------------------------------------------------------
-function editBlogPost(postId) {
+async function editBlogPost(postId) {
     const post = blogPosts.find(p => p.id === postId);
     if (!post) {
         alert("Blogginlägg kunde inte hittas.");
         return;
     }
 
-    isEditing = true; // Sätt flaggan till redigering
-
+    isEditing = true;
     document.querySelector("#blogId").value = post.id;
     document.querySelector("#blog-title").value = post.title;
-    document.querySelector("#blog-content").value = post.content;
+    document.querySelector("#blog-text").value = post.blogText;
     document.querySelector("#blog-likes").value = post.likes;
     document.querySelector("#blog-contact-link").value = post.contact_link;
     document.querySelector("#blog-is-advertisement").checked = post.is_advertisement;
@@ -199,13 +214,16 @@ function editBlogPost(postId) {
     const imagePreview = document.querySelector("#image-preview");
     if (post.image_url) {
         imagePreview.innerHTML = `
-            <img src="${post.image_url}" alt="Förhandsvisning" 
-                 class="img-fluid rounded border" 
-                 style="max-width: 100%; height: auto;" />
+            <img src="${post.image_url}" alt="Förhandsvisning"
+                class="img-fluid rounded border"
+                style="max-width: 100%; height: auto;" />
         `;
     } else {
         imagePreview.innerHTML = "Ingen bild tillgänglig";
     }
+
+    // 🟢 Ladda kontrakt och sätt valt
+    await loadContractDropdown(post.company_name);
 
     const modal = new bootstrap.Modal(document.querySelector("#blog-modal"));
     modal.show();
@@ -216,34 +234,44 @@ function editBlogPost(postId) {
 // --------------------------------------
 async function updateBlogPost(postId) {
     const title = document.querySelector("#blog-title").value;
-    const content = document.querySelector("#blog-content").value;
+    const blogText = document.querySelector("#blog-text").value;
     const likes = parseInt(document.querySelector("#blog-likes").value) || 0;
-    const contactLink = document.querySelector("#blog-contact-link").value || ""; // Säkerställ att detta inte är null
+    const contactLink = document.querySelector("#blog-contact-link").value || "";
     const isAdvertisement = document.querySelector("#blog-is-advertisement").checked;
     const imageFile = document.querySelector("#blog-image-upload").files[0];
+    const companyName = document.querySelector("#blog-contract").value;
+
+    if (!companyName || companyName === "") {
+        alert("Du måste välja ett giltigt kontrakt.");
+        return;
+    }
 
     try {
         const formData = new FormData();
         formData.append("title", title);
-        formData.append("content", content);
+        formData.append("blogText", blogText);
         formData.append("likes", likes);
-        formData.append("contact_link", contactLink); // Se till att det inte är null
+        formData.append("contact_link", contactLink);
         formData.append("is_advertisement", isAdvertisement);
+        formData.append("company_name", companyName); // 🟢 Rätt namn skickas med
+
         if (imageFile) {
             formData.append("image", imageFile);
         }
 
-        const response = await fetch(`${BASE_URL}/blogposts/${postId}`, {
+        const response = await fetch(`${ENDPOINTS.blogList}/${postId}`, {
             method: "PUT",
             body: formData,
         });
 
         if (!response.ok) {
-            throw new Error(`Misslyckades med att uppdatera blogginlägget: ${response.statusText}`);
+            throw new Error(await response.text());
         }
 
         alert("Blogginlägget har uppdaterats!");
-        fetchBlogPosts(); // Uppdatera listan
+        const modal = bootstrap.Modal.getInstance(document.querySelector("#blog-modal"));
+        modal.hide();
+        fetchBlogPosts(); // 🔁 Uppdatera listan
     } catch (error) {
         console.error("Fel vid uppdatering:", error.message);
         alert("Misslyckades med att uppdatera blogginlägget.");
@@ -259,7 +287,7 @@ async function deleteBlogPost(postId) {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}/blogposts/${postId}`, {
+        const response = await fetch(`${ENDPOINTS.blogList}/${postId}`, {
             method: "DELETE",
         });
 
@@ -275,35 +303,51 @@ async function deleteBlogPost(postId) {
     }
 }
 
-// --------------------------------------------------------------
-// Packar kontraktstabellen til dropdown
-// --------------------------------------------------------------
-async function fetchContracts() {
+async function loadContractDropdown(selectedName = "") {
+    const select = document.querySelector("#blog-contract");
+    if (!select) return;
+
+    select.innerHTML = `<option value="">Ingen</option>`;  // Reset
+
     try {
-        // Skicka GET-request till rätt API för kontrakt
-        const response = await fetch(ENDPOINTS.contracts);
-        if (!response.ok) {
-            throw new Error("Misslyckades med att hämta företag.");
-        }
+        const res = await fetch("/api/contracts");
+        if (!res.ok) throw new Error("Fel vid hämtning av kontrakt");
+        const data = await res.json();
 
-        const contracts = await response.json(); // Förvänta att API returnerar en lista
-        const contractDropdown = document.querySelector("#blog-contract");
-
-        // Fyll dropdown med företagsnamn
-        contracts.forEach(contract => {
+        data.forEach(contract => {
             const option = document.createElement("option");
-            option.value = contract.company_name; // Använd företagsnamn som värde
-            option.textContent = contract.company_name; // Visa företagsnamn
-            contractDropdown.appendChild(option);
+            option.value = contract.company_name;
+            option.textContent = contract.company_name;           
+
+            if (contract.company_name === selectedName) {
+                option.selected = true;
+            }
+
+            select.appendChild(option);
         });
-    } catch (error) {
-        console.error("Fel vid hämtning av företag:", error);
-        alert("Kunde inte ladda företag för dropdown.");
+    } catch (err) {
+        console.error("Misslyckades hämta kontrakt:", err);
     }
 }
 
+const saveBlogButton = document.querySelector("#save-blog");
+if (saveBlogButton) {
+    saveBlogButton.addEventListener("click", () => {
+        const blogId = document.querySelector("#blogId").value;
+        if (blogId) {
+            updateBlogPost(blogId);
+        } else {
+            saveBlogPost();
+        }
+    });
+}
+
 // Kör funktionen för att fylla dropdown vid sidladdning
-fetchContracts();
+loadContractDropdown();
+
+window.editBlogPost = editBlogPost;
+window.deleteBlogPost = deleteBlogPost;
+
 
 
 

@@ -8,8 +8,9 @@
 export const BASE_URL = "https://my.supportnet.se";
 
 export const ENDPOINTS = {
-    industries: `${BASE_URL}/api/industries`,
+    industries: `${BASE_URL}/api/industries/`,  // <--- med avslutande /
     contracts: `${BASE_URL}/api/contracts`,
+    allUsers: `${BASE_URL}/api/users`,
     users: `${BASE_URL}/api/contracts/:id/users`,
     addUser: `${BASE_URL}/api/users`,
     updateUser: (userId) => `${BASE_URL}/api/users/${userId}`,

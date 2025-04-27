@@ -132,6 +132,7 @@ def update_user(user_id: int, payload: UserSchema, db: Session = Depends(get_db)
     user.s_name = payload.s_name
     user.email = payload.email
     user.role = payload.role
+    user.status = payload.status
     user.rights = payload.rights
     user.active = payload.active if payload.active is not None else user.active
     user.contract_id = payload.contract_id if payload.contract_id else user.contract_id

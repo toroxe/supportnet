@@ -23,8 +23,10 @@
             <h2>Kontraktsinformation</h2>
             <div class="d-flex justify-content-end gap-2 mb-3">
                 <button class="btn btn-secondary" onclick="closeContractForm()">Stäng</button>
+                <button class="btn btn-primary" id="openIndustryModalBtn">+ Ny bransch</button>
                 <button class="btn btn-success" onclick="saveContract()">Spara</button>
-            </div>            
+            </div>
+                        
         </div>
 
         <div class="row mt-3">
@@ -99,7 +101,7 @@
                     <input type="date" id="registrationDate" class="form-control">
                 </form>
             </div>
-  
+
             <div class="col-md-4 border-end section-box">
                 <h4>Tjänster</h4>
                 <div id="services">
@@ -138,7 +140,7 @@
             </div>
         </div>
     </div>
-   
+
     <!-- Modal för att redigera användare -->
     <div id="userModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -176,14 +178,65 @@
                 </div>
             </div>
         </div>
-    </div> 
+    </div>
+
+    <!-- 🌟 Industry Modal -->
+    <div class="modal fade" id="industryModal" tabindex="-1" aria-labelledby="industryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="modal-title m-0" id="industryModalLabel">Skapa eller redigera bransch</h5>
+                <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Stäng"></button>
+            </div>              
+    
+            <div class="modal-body">
+            <div class="row">
+                <!-- Vänster kolumn -->
+                <div class="col-md-6 border-end pe-4">
+                <h6 class="mb-3">Mina Branscher</h6>
+                <div id="industry-list" class="list-group">
+                    <!-- Branscher laddas här via JS -->
+                    <!-- Varje rad får en Redigera-knapp -->
+                </div>
+                </div>
+    
+                <!-- Höger kolumn -->
+                <div class="col-md-6 ps-4">
+                <h6 class="mb-3">Branschformulär</h6>
+                <form id="industryForm">
+                    <input type="hidden" id="industry-id-hidden">
+    
+                    <div class="mb-3">
+                    <label for="new-industry-name" class="form-label">Namn</label>
+                    <input type="text" class="form-control" id="new-industry-name" required>
+                    </div>
+                    <div class="mb-3">
+                    <label for="new-industry-note" class="form-label">Notering (valfritt)</label>
+                    <textarea class="form-control" id="new-industry-note" rows="2"></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="new-industry-active" checked>
+                    <label class="form-check-label" for="new-industry-active">Aktiv</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary rounded-pill">Spara</button>
+                </form>
+                </div>
+            </div>
+            </div>
+    
+            <div class="modal-footer">
+            <button class="btn btn-secondary rounded-pill" data-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+        </div>
+    </div>
 
     <!-- jQuery först, sedan Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Ditt kontraktsskript -->
-    <script src="../jscripts/contract.js" defer></script>
+    <script type="module" src="../janitorScripts/contract.js"></script>
 
 </body>
 </html>
