@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JATC - Yatzyprotokoll</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 10px;
+    background-color: #fdf6e3;
+}
+h1 {
+    text-align: center;
+    font-size: 24px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: center;
+    font-size: 14px;
+}
+th input {
+    width: 40px;
+    font-size: 12px;
+    text-align: center;
+}
+input[type="number"] {
+    width: 50px;
+    font-size: 14px;
+    text-align: center;
+}
+input.summa, input.bonus {
+    font-weight: bold;
+    background-color: #eee;
+    border-top: 3px solid #000;
+    border-bottom: 3px solid #000;
+}
+button {
+    margin-top: 15px;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+}
+button:hover {
+    background-color: #45a049;
+}
+.active-player {
+    background-color: #a8e6a3;
+}
+</style>
+</head>
+<body>
+
+<h1>JATC - Yatzyprotokoll</h1>
+<a href="https://my.supportnet.se/diaz.html" class="link-button" style="display:inline-block; margin-top:20px; padding:15px 25px; font-size:20px; background-color:#2196F3; color:white; text-decoration:none; border-radius:10px; font-weight:bold;">Till Tärningarna</a>
+<table>
+<thead>
+<tr>
+    <th>Kategori</th>
+    <th><input type="text" maxlength="5" placeholder="Sp1"></th>
+    <th><input type="text" maxlength="5" placeholder="Sp2"></th>
+    <th><input type="text" maxlength="5" placeholder="Sp3"></th>
+    <th><input type="text" maxlength="5" placeholder="Sp4"></th>
+</tr>
+</thead>
+<tbody id="yatzy-body">
+<!-- Fylls av JavaScript -->
+</tbody>
+</table>
+
+<button id="reset-button">Nollställ Protokoll</button>
+
+<script>
+const categories = [
+    "Ettor", "Tvåor", "Treor", "Fyror", "Femmor", "Sexor", 
+    "Summa", "Bonus", "1 par", "2 par", "Tretal", "Fyrtal", 
+    "Liten straight", "Stor straight", "Kåk", "Chans", "YATZY", "Summa"
+];
+
+const tbody = document.getElementById('yatzy-body');
+
+// Bygg protokollet
+categories.forEach((category, rowIndex) => {
+    const tr = document.createElement('tr');
+    const categoryCell = document.createElement('td');
+    categoryCell.textContent = category;
+    tr.appendChild(categoryCell);
+
+    for (let colIndex = 0; colIndex < 4; colIndex++) {
+    const td = document.createElement('td');
+    const input = document.createElement('input');
+    input.type = "number";
+    input.min = "0";
+    if (category === "Summa") {
+        input.classList.add("summa");
+        input.readOnly = true;
+    }
+    if (category === "Bonus") {
+        input.classList.add("bonus");
+        input.readOnly = true;
+    }
+
+    // Läs från sessionStorage
+    const key = `cell-${rowIndex}-${colIndex}`;
+    const savedValue = sessionStorage.getItem(key);
+    if (savedValue !== null) {
+        input.value = savedValue;
+    }
+
+    // Spara till sessionStorage
+    input.addEventListener('input', () => {
+        sessionStorage.setItem(key, input.value);
+        updateSums();
+        const activePlayers = getActivePlayers();
+        if (activePlayers.length > 0) {
+        activeIndex = (activeIndex + 1) % activePlayers.length;
+        setActivePlayer(activePlayers[activeIndex].index);
+        }
+    });
+
+    td.appendChild(input);
+    tr.appendChild(td);
+    }
+
+    tbody.appendChild(tr);
+});
+
+// Hantera aktiv spelare
+const playerInputs = document.querySelectorAll('thead input[type="text"]');
+let activeIndex = 0;
+
+function setActivePlayer(index) {
+    playerInputs.forEach(input => input.classList.remove('active-player'));
+    if (playerInputs[index]) {
+    playerInputs[index].classList.add('active-player');
+    }
+}
+
+function getActivePlayers() {
+    return Array.from(playerInputs).map((input, index) => ({
+    index: index,
+    name: input.value.trim()
+    })).filter(player => player.name !== "");
+}
+
+// Summering och bonus
+function updateSums() {
+    for (let col = 1; col <= 4; col++) {
+    let upperSum = 0;
+    const upperInputs = document.querySelectorAll(`#yatzy-body tr:nth-child(-n+6) td:nth-child(${col + 1}) input[type="number"]`);
+    upperInputs.forEach(input => {
+        if (input.value) upperSum += parseInt(input.value);
+    });
+
+    const upperSumField = document.querySelector(`#yatzy-body tr:nth-child(7) td:nth-child(${col + 1}) input.summa`);
+    if (upperSumField) upperSumField.value = upperSum;
+
+    const bonusField = document.querySelector(`#yatzy-body tr:nth-child(8) td:nth-child(${col + 1}) input.bonus`);
+    if (bonusField) bonusField.value = (upperSum >= 63) ? 50 : 0;
+
+    let totalSum = upperSum;
+    const lowerInputs = document.querySelectorAll(`#yatzy-body tr:nth-child(n+9):not(:last-child) td:nth-child(${col + 1}) input[type="number"]`);
+    lowerInputs.forEach(input => {
+        if (input.value) totalSum += parseInt(input.value);
+    });
+
+    const totalSumField = document.querySelector(`#yatzy-body tr:last-child td:nth-child(${col + 1}) input.summa`);
+    if (totalSumField) totalSumField.value = totalSum;
+    }
+}
+
+// Startläge
+setActivePlayer(0);
+updateSums();
+
+// Nollställ allt (inkl. sessionStorage)
+document.getElementById('reset-button').addEventListener('click', () => {
+    if (confirm("Vill du verkligen nollställa protokollet?")) {
+    document.querySelectorAll('input[type="number"]').forEach(input => input.value = '');
+    document.querySelectorAll('thead input[type="text"]').forEach(input => input.value = '');
+    sessionStorage.clear();
+    setActivePlayer(0);
+    }
+});
+</script>
+    
+
+</body>
+</html>
+
+
+

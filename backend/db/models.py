@@ -51,6 +51,7 @@ class AnalyticsLog(Base):
     user_agent = Column(Text, nullable=True)
     region = Column(String(255), nullable=True)
     timevisit = Column(DateTime, nullable=False, default=func.current_timestamp())
+    session_time_duration = Column(Integer, nullable=True)
     is_bot = Column(Boolean, nullable=False, default=False)
     
     class Config:
@@ -104,7 +105,28 @@ class ContractServices(Base):
 
     class Config:
         from_attributes = True
-    
+
+#--------------------------------------------------------------------------------------------
+# Ekonomiska grundinställningar
+#--------------------------------------------------------------------------------------------
+
+class EcoSetting(Base):
+    __tablename__ = "eco_settings"
+
+    setting_id = Column(Integer, primary_key=True, autoincrement=True)
+    contract_id = Column(Integer, ForeignKey("contracts.contract_id"), nullable=False)
+    limit_balance = Column(Float, default=0.0)
+    limit_tax = Column(Float, default=10.0)
+    limit_vat = Column(Float, default=10.0)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    # Kopplingar
+    transactions = relationship("Transaction", back_populates="settings")
+
+    class Config:
+        from_attributes = True
+
 # --------------------------------------
 # Eknonomiska transaktioner företag Model
 # --------------------------------------
@@ -113,6 +135,8 @@ class Transaction(Base):
     __tablename__ = "transactions"
     __table_args__ = {'extend_existing': True}  # Lägg till detta
     transid = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    setting_id = Column(Integer, ForeignKey("eco_settings.setting_id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)
     transaction_date = Column(Date, nullable=False)
     description = Column(String(255), nullable=True)
     income = Column(Float, default=0.0, nullable=True)
@@ -125,6 +149,10 @@ class Transaction(Base):
     is_personal = Column(Boolean, default=False, nullable=False)
     no_vat = Column(Boolean, default=False, nullable=False)
     t_type = Column(Enum("regular", "update", name="transaction_type_enum"), nullable=False, default="regular")  # Ny kolumn
+    
+    # Relationer
+    settings = relationship("EcoSetting", back_populates="transactions")
+    user = relationship("User")
     
     class Config:
         from_attributes = True  # Ersätt orm_mode med detta

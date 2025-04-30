@@ -42,6 +42,7 @@ export function renderAccordion(data) {
                                     <th>Aktivitet</th>
                                     <th>Enhet</th>
                                     <th>Besök</th>
+                                    <th>Test</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -52,7 +53,8 @@ export function renderAccordion(data) {
                                             <td>${entry.page_url || "/"}</td>
                                             <td>${entry.action_type || "Klick"}</td>
                                             <td>${entry.user_agent || "Okänd"}</td>
-                                            <td>${formatSessionDuration(entry.timevisit)}</td>
+                                            <td>${formatSessionDurationEntry(entry)}</td>
+                                            <td>${entry.action_type === "test_log" ? "Testbesök" : "Riktigt besök"}</td>
                                         </tr>`
                                     )
                                     .join("")}
@@ -97,18 +99,6 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
-// Helper: Formatera sessionens längd
-function formatSessionDuration(startTimestamp) {
-    const startTime = new Date(startTimestamp);
-    const now = new Date();
-    const durationInSeconds = Math.floor((now - startTime) / 1000);
-
-    const minutes = Math.floor(durationInSeconds / 60);
-    const seconds = durationInSeconds % 60;
-
-    return `${minutes} min ${seconds} sek`;
-}
-
 // Load analytics data and render accordion
 async function loadAnalytics() {
     try {
@@ -128,4 +118,14 @@ async function loadAnalytics() {
 document.addEventListener('DOMContentLoaded', () => {
     loadAnalytics();
 });
+
+function formatSessionDurationEntry(entry) {
+    if (typeof entry.session_time_duration === "number" && entry.session_time_duration >= 0) {
+        const minutes = Math.floor(entry.session_time_duration / 60);
+        const seconds = entry.session_time_duration % 60;
+        return `${minutes} min ${seconds} sek`;
+    }
+    return "Okänd tid";
+}
+
 

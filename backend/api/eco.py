@@ -1,12 +1,61 @@
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from backend.db.database import get_db
 from backend.db.models import Transaction
+from backend.db.models import EcoSetting
 
 # Skapa router
 router = APIRouter(prefix="/eco", tags=["Economy"])
 
+class EcoSettingCreate(BaseModel):
+    contract_id: int
+    limit_balance: float = 0
+    limit_tax: float = 10
+    limit_vat: float = 10
+
+class EcoSettingOut(EcoSettingCreate):
+    setting_id: int
+
+# ===========================================================================================================
+# ================================ Inställningar-relaterade endpoints =======================================
+# ===========================================================================================================
+#----------------------------------------------
+# Hämta inställningsr per kontrakt
+#---------------------------------------------
+
+@router.get("/settings/{contract_id}", response_model=EcoSettingOut)
+async def get_eco_setting(contract_id: int, db: Session = Depends(get_db)):
+    setting = db.query(EcoSetting).filter(EcoSetting.contract_id == contract_id).first()
+    if not setting:
+        raise HTTPException(status_code=404, detail="Inställningar för kontraktet hittades inte.")
+    return setting
+
+#---------------------------------------------
+# Uppdaterar inställningar
+#---------------------------------------------
+
+@router.put("/settings/{contract_id}", response_model=EcoSettingOut)
+async def update_eco_setting(contract_id: int, setting: EcoSettingCreate, db: Session = Depends(get_db)):
+    existing = db.query(EcoSetting).filter(EcoSetting.contract_id == contract_id).first()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Inställningar för kontraktet finns inte.")
+
+    existing.limit_balance = setting.limit_balance
+    existing.limit_tax = setting.limit_tax
+    existing.limit_vat = setting.limit_vat
+    db.commit()
+    db.refresh(existing)
+    return existing
+
+# ==========================================================================================================
+# ================================= Transaktions-relaterade endpoints ======================================
+# ==========================================================================================================
+
+#--------------------------------------------
 # Lägg till transaktion
+#--------------------------------------------
+
 @router.post("/add-transaction")
 def add_transaction(transaction: dict, db: Session = Depends(get_db)):
     try:
@@ -37,7 +86,9 @@ def add_transaction(transaction: dict, db: Session = Depends(get_db)):
         print(f"Error when adding transaction: {e}")
         raise HTTPException(status_code=500, detail=f"Ett fel inträffade: {str(e)}")
 
+#-------------------------------------------
 # Hämta saldo
+#-------------------------------------------
 @router.get("/balance")
 def get_balance(db: Session = Depends(get_db)):
     try:
@@ -48,7 +99,10 @@ def get_balance(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ett fel inträffade: {str(e)}")
 
+#-------------------------------------------
 # Uppdatera moms och skatt
+#-------------------------------------------
+
 @router.post("/vat-summary")
 def update_vat_summary(vat_adjustment: dict, db: Session = Depends(get_db)):
     try:
@@ -64,7 +118,9 @@ def update_vat_summary(vat_adjustment: dict, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ett fel inträffade: {str(e)}")
 
-# Hämtar posterna på DB    
+#------------------------------------------------
+# Hämtar alla posterna på DB  
+#------------------------------------------------  
 @router.get("/transactions")
 def get_transactions(db: Session = Depends(get_db)):
     try:
@@ -79,11 +135,58 @@ def get_transactions(db: Session = Depends(get_db)):
                 "description": t.description,
                 "is_personal": t.is_personal,
                 "no_vat": t.no_vat,
-                
+                "user_id": t.user_id,  
             }
             for t in transactions
         ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ett fel inträffade: {str(e)}")
 
+#-------------------------------------------------------
+# Hämtar en specifik transaktion på Databasen
+#-------------------------------------------------------
 
+@router.get("/transactions/{transid}")
+def get_transaction(transid: int, db: Session = Depends(get_db)):
+    transaction = db.query(Transaction).filter(Transaction.transid == transid).first()
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaktion hittades inte.")
+
+    return {
+        "id": transaction.transid,
+        "transaction_date": transaction.transaction_date.strftime('%Y-%m-%d'),
+        "income": transaction.income,
+        "expense": transaction.expense,
+        "vat": transaction.vat,
+        "description": transaction.description,
+        "is_personal": transaction.is_personal,
+        "no_vat": transaction.no_vat,
+        "user_id": transaction.user_id,
+    }
+    
+#-------------------------------------------
+# Uppdatera en transaktion
+#-------------------------------------------
+
+@router.put("/update-transaction/{transid}")
+def update_transaction(transid: int, data: dict, db: Session = Depends(get_db)):
+    try:
+        transaction = db.query(Transaction).filter(Transaction.transid == transid).first()
+        if not transaction:
+            raise HTTPException(status_code=404, detail="Transaktionen kunde inte hittas.")
+
+        transaction.transaction_date = data.get("transaction_date", transaction.transaction_date)
+        transaction.description = data.get("description", transaction.description)
+        transaction.income = data.get("income", transaction.income)
+        transaction.expense = data.get("expense", transaction.expense)
+        transaction.vat = data.get("vat", transaction.vat)
+        transaction.is_personal = data.get("is_personal", transaction.is_personal)
+        transaction.no_vat = data.get("no_vat", transaction.no_vat)
+
+        db.commit()
+        db.refresh(transaction)
+
+        return {"message": "Transaktion uppdaterad", "id": transaction.transid}
+    except Exception as e:
+        print(f"Error when updating transaction: {e}")
+        raise HTTPException(status_code=500, detail=f"Ett fel inträffade: {str(e)}")

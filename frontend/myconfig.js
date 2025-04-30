@@ -25,7 +25,14 @@ export const ENDPOINTS = {
     sendContact: `${BASE_URL}/api/send_contact_email`,
     registerUser: `${BASE_URL}/api/users`,
     sendWelcome: `${BASE_URL}/api/send_welcome_email`,
-
+    ecoSettingsGet: `${BASE_URL}/api/eco/settings/1`,
+    ecoSettingsUpdate: `${BASE_URL}/api/eco/settings/1`,
+    ecoTransactions: `${BASE_URL}/api/eco/transactions`,
+    ecoUpdateTransaction: (id) => `${BASE_URL}/api/eco/update-transaction/${id}`,
+    ecoAddTransaction: `${BASE_URL}/api/eco/add-transaction`,
+    ecoBalance: `${BASE_URL}/api/eco/balance`,
+    ecoVatSummary: `${BASE_URL}/api/eco/vat-summary`,
+    ecoVatTransactions: (page, limit) => `${BASE_URL}/api/eco/vat-transactions?page=${page}&limit=${limit}`,
 };
 
 export const API_VERSION = "v1";

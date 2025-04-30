@@ -3,17 +3,16 @@ import { renderAccordion } from './acc_render.js';
 const BASE_URL = "https://my.supportnet.se/api/";
 const analyticsUrl = `${BASE_URL}analytics`;
 
+let sessionStartTime = Date.now(); // Spara starttid för sessionen
+
 document.addEventListener("DOMContentLoaded", () => {
     console.log("newcookies.js loaded");
 
-    // Kontrollera och logga analytics endast en gång
-    if (!localStorage.getItem("analyticsLogged")) {
-        logAnalytics("Cookie Analytics Page", "page_load");
-        localStorage.setItem("analyticsLogged", "true");
-    }
+    // Hantera session-cookie
+    handleSessionCookie();
 
-    // Hämta och rendera analytics data
-    //fetchAnalytics();
+    // Logga första sidbesöket
+    logAnalytics("Cookie Analytics Page", "page_load");
 
     // Event listener för att rensa data
     const clearButton = document.querySelector("#raderar");
@@ -24,6 +23,15 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // Lägg till i DOMContentLoaded:
+const testButton = document.querySelector("#test-log-button");
+if (testButton) {
+    testButton.addEventListener("click", () => {
+        sendTestLog();
+    });
+}
+
 });
 
 // ---------------------------------------------
@@ -35,54 +43,29 @@ function logAnalytics(page, action) {
         page_url: page,
         action_type: action,
         session_id: getSessionId() || "undefined",
-        ip_address: "192.168.0.1" // Här lägger vi till en mockad IP om client-host ej finns
+        session_duration: calculateSessionDuration(), // NYTT!
     };
     sendData(payload);
 }
 
 // ---------------------------------------------
-// Funktion: Hämta och rendera analytics data
+// Funktion: Räkna ut hur lång sessionen är
 // ---------------------------------------------
-async function fetchAnalytics() {
-    try {
-        const response = await fetch(analyticsUrl);
-        const data = await response.json();
-
-        if (!Array.isArray(data)) {
-            throw new Error("Analytics-data är inte i rätt format.");
-        }
-
-        console.log("Hämtad data från servern:", data);
-
-        // Rendera endast om data faktiskt finns
-        if (data.length > 0) {
-            renderAccordion(data);
-        } else {
-            console.warn("Inga analytics-data att rendera.");
-        }
-    } catch (error) {
-        console.error("Misslyckades att hämta analytics-data:", error);
-    }
+function calculateSessionDuration() {
+    const now = Date.now();
+    const durationInSeconds = Math.floor((now - sessionStartTime) / 1000);
+    return durationInSeconds;
 }
 
 // ---------------------------------------------
-// Funktion: Rensa analytics data
+// Funktion: Generera ett nytt unikt session-ID
 // ---------------------------------------------
-async function clearAnalytics() {
-    try {
-        const response = await fetch(analyticsUrl, {
-            method: "DELETE",
-        });
-
-        if (response.ok) {
-            alert("Analytics-data rensad.");
-            fetchAnalytics(); // Uppdatera listan efter rensning
-        } else {
-            alert("Misslyckades att rensa analytics-data.");
-        }
-    } catch (error) {
-        console.error("Fel vid rensning av analytics-data:", error);
-    }
+function generateSessionId() {
+    return 'xxxx-4xxx-yxxx-xxxx'.replace(/[xy]/g, (c) => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 // ---------------------------------------------
@@ -108,8 +91,21 @@ function sendData(data) {
         });
 }
 
+//----------------------------------------------
+// Hantera sessions cookien
+//---------------------------------------------
+function handleSessionCookie() {
+    const sessionCookie = getSessionId();
+    if (!sessionCookie) {
+        const newSessionId = generateSessionId();
+        const cookieData = { session_id: newSessionId, start_time: Date.now() }; // Starttid i cookien
+        document.cookie = `session_cookie=${JSON.stringify(cookieData)}; path=/; max-age=300`; // 5 minuter
+        console.log("Ny session-cookie skapad:", cookieData.session_id);
+    }
+}
+
 // ---------------------------------------------
-// Hjälp: Hämta session ID
+// Funktion: Hämta session-ID från cookie
 // ---------------------------------------------
 function getSessionId() {
     const cookies = document.cookie.split("; ");
@@ -118,6 +114,11 @@ function getSessionId() {
         if (key === "session_cookie") {
             try {
                 const cookieData = JSON.parse(value);
+                if (!cookieData.start_time) {
+                    cookieData.start_time = Date.now(); // Säkerställ start_time finns
+                    document.cookie = `session_cookie=${JSON.stringify(cookieData)}; path=/; max-age=300`;
+                }
+                sessionStartTime = cookieData.start_time; // NU SÄTTER VI rätt starttid
                 return cookieData.session_id;
             } catch (error) {
                 console.error("Misslyckades att tolka session_cookie:", error);
@@ -126,3 +127,42 @@ function getSessionId() {
     }
     return null;
 }
+
+// ---------------------------------------------
+// Funktion: Rensa analytics data
+// ---------------------------------------------
+async function clearAnalytics() {
+    try {
+        const response = await fetch(analyticsUrl, {
+            method: "DELETE",
+        });
+
+        if (response.ok) {
+            alert("Analytics-data rensad.");
+            localStorage.removeItem("analyticsLogged"); // Ta bort loggmarkering
+            document.cookie = "session_cookie=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // Radera session-cookie
+            window.location.reload(); // Starta om allt snyggt!
+        } else {
+            alert("Misslyckades att rensa analytics-data.");
+        }
+    } catch (error) {
+        console.error("Fel vid rensning av analytics-data:", error);
+    }
+}
+
+//---------------------------------------------
+// Test av funktionalitet
+//---------------------------------------------
+
+function sendTestLog() {
+    const payload = {
+        page_url: "TestPage",
+        action_type: "test_log",
+        session_id: getSessionId() || "undefined",
+        session_duration: calculateSessionDuration(),
+        ip_address: "8.8.8.8" // FAKTISK IP FÖR TEST (exempel: Google DNS-adress)
+    };
+    sendData(payload);
+    alert("Testlogg skickad!");
+}
+

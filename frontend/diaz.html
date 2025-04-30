@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JATC - Slå Tärningar</title>
+<style>
+body {
+    font-family: 'Trebuchet MS', sans-serif;
+    background-color: #fdf6e3;
+    text-align: center;
+    padding: 20px;
+}
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+h1 {
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+.subheader {
+    font-size: 18px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+#roll-count {
+    font-size: 18px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: white;
+    width: 40px;
+}
+#reset-button {
+    padding: 5px 10px;
+    font-size: 16px;
+    background-color: #e53935;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#reset-button:hover {
+    background-color: #d32f2f;
+}
+.dice-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.dice-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.dice {
+    font-size: 48px;
+    padding: 20px;
+    width: 70px;
+    height: 70px;
+    background: white;
+    border: 2px solid black;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+}
+.dice-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: shake 0.6s;
+}
+input[type="checkbox"] {
+    margin-top: 5px;
+}
+button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #45a049;
+}
+h2 {
+    margin-top: 30px;
+    font-size: 22px;
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+    font-size: 18px;
+}
+.link-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 15px 25px;
+    font-size: 20px;
+    background-color: #2196F3;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: bold;
+}
+.link-button:hover {
+    background-color: #1976D2;
+}
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>Slå Tärningar 🎲</h1>
+</div>
+
+<div class="subheader">
+Antal kast: <input id="roll-count" type="text" value="0" readonly>
+<button id="reset-button" onclick="resetGame()">Nollställ</button>
+</div>
+
+<div class="dice-layout">
+<div class="dice-row" id="row-top"></div>
+<div class="dice-row" id="row-middle"></div>
+<div class="dice-row" id="row-bottom"></div>
+</div>
+
+<button onclick="rollDice()">Kasta</button>
+
+<h2>Möjliga utfall</h2>
+<ul id="outcomes">
+<!-- Dynamiska resultat -->
+</ul>
+
+<a href="https://my.supportnet.se/yatzy.html" class="link-button">Till Protokollet</a>
+
+<script>
+    const rollCountEl = document.getElementById('roll-count');
+    const outcomesEl = document.getElementById('outcomes');
+    const rowTop = document.getElementById('row-top');
+    const rowMiddle = document.getElementById('row-middle');
+    const rowBottom = document.getElementById('row-bottom');
+    let rollCount = parseInt(sessionStorage.getItem("rollCount")) || 0;
+    rollCountEl.value = rollCount;
+    const dice = [];
+    const saved = [];
+    
+    function createDie(parentRow, i) {
+        const group = document.createElement('div');
+        group.className = 'dice-group';
+    
+        const die = document.createElement('div');
+        die.className = 'dice';
+        die.textContent = sessionStorage.getItem(`die-${i}`) || '-';
+        group.appendChild(die);
+    
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = sessionStorage.getItem(`saved-${i}`) === "true";
+        group.appendChild(checkbox);
+    
+        dice.push(die);
+        saved.push(checkbox);
+    
+        parentRow.appendChild(group);
+    }
+    
+    for (let i = 0; i < 2; i++) createDie(rowTop, i);
+    createDie(rowMiddle, 2);
+    for (let i = 3; i < 5; i++) createDie(rowBottom, i);
+    
+    function rollDice() {
+        rollCount++;
+        rollCountEl.value = rollCount;
+        sessionStorage.setItem("rollCount", rollCount);
+        const values = [];
+    
+        for (let i = 0; i < 5; i++) {
+            if (!saved[i].checked) {
+                const roll = Math.floor(Math.random() * 6) + 1;
+                dice[i].textContent = roll;
+                dice[i].parentElement.classList.remove('shake');
+                void dice[i].parentElement.offsetWidth;
+                dice[i].parentElement.classList.add('shake');
+                values.push(roll);
+                sessionStorage.setItem(`die-${i}`, roll);
+            } else {
+                const value = parseInt(dice[i].textContent);
+                values.push(value);
+            }
+            sessionStorage.setItem(`saved-${i}`, saved[i].checked);
+        }
+    
+        updateOutcomes(values);
+    }
+    
+    function updateOutcomes(values) {
+        const counts = {};
+        outcomesEl.innerHTML = '';
+        values.forEach(v => counts[v] = (counts[v] || 0) + 1);
+    
+        const results = [];
+    
+        if (Object.values(counts).includes(5)) results.push('Yatzy');
+        if (Object.values(counts).includes(4)) results.push('Fyrtal');
+        if (Object.values(counts).includes(3) && Object.values(counts).includes(2)) results.push('Kåk');
+        if (Object.values(counts).includes(3)) results.push('Tretal');
+        if (Object.values(counts).filter(c => c === 2).length === 2) results.push('Två par');
+        if (Object.values(counts).includes(2)) results.push('Par');
+    
+        const uniqueSorted = [...new Set(values)].sort();
+        if (JSON.stringify(uniqueSorted) === JSON.stringify([1,2,3,4,5])) results.push('Liten straight');
+        if (JSON.stringify(uniqueSorted) === JSON.stringify([2,3,4,5,6])) results.push('Stor straight');
+    
+        if (results.length === 0) results.push('Inga särskilda utfall');
+    
+        results.forEach(r => {
+            const li = document.createElement('li');
+            li.textContent = r;
+            outcomesEl.appendChild(li);
+        });
+    }
+    
+    function resetGame() {
+        rollCount = 0;
+        rollCountEl.value = 0;
+        dice.forEach((d, i) => {
+            d.textContent = '-';
+            sessionStorage.setItem(`die-${i}`, '-');
+        });
+        saved.forEach((c, i) => {
+            c.checked = false;
+            sessionStorage.setItem(`saved-${i}`, "false");
+        });
+        outcomesEl.innerHTML = '';
+        sessionStorage.setItem("rollCount", "0");
+    }
+    </script>    
+
+</body>
+</html>
+
+
+
+
+

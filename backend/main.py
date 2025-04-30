@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, Response, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 from backend.db.database import get_db
 from backend.db.cook import handle_cookies
 from backend.api.mail import router as mail_router
@@ -131,8 +132,9 @@ async def cookie_middleware(request: Request, call_next):
     excluded_paths = ["/api/analytics", "/api/user", "/docs", "/openapi.json"]
 
     try:
-        if request.url.path not in excluded_paths:
+        if not any(request.url.path.startswith(path) for path in excluded_paths):
             # Anropa handle_cookies endast om path inte exkluderas
+            log_analytics_hit(request, db)
             handle_cookies(request, response, db)
         response = await call_next(request)  # Fortsätt till nästa nivå
     except Exception as e:
@@ -140,6 +142,25 @@ async def cookie_middleware(request: Request, call_next):
     finally:
         db.close()  # Stäng databasen
     return response
+
+def log_analytics_hit(request: Request, db: Session):
+    try:
+        path = request.url.path
+        method = request.method
+        user_agent = request.headers.get("user-agent", "unknown")
+        referrer = request.headers.get("referer", "unknown")
+        ip = request.client.host
+
+        logline = f"[ANALYTICS] {method} {path} from {ip} (UA: {user_agent}, Ref: {referrer})"
+        print(logline)
+
+        # Du kan här spara till DB om du vill, exempel:
+        # db.add(AnalyticsHit(path=path, method=method, ip=ip, ua=user_agent, ref=referrer, timestamp=datetime.utcnow()))
+        # db.commit()
+
+    except Exception as e:
+        print(f"Analytics logging failed: {e}")
+
 
 # Root-endpoint
 @app.get("/")

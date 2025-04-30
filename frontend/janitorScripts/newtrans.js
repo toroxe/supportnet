@@ -1,4 +1,6 @@
-const BASE_URL = "https://my.supportnet.se/api";
+import { BASE_URL, ENDPOINTS } from "../myconfig.js";
+
+let editingId = null;
 
 // ==============================
 // Funktion för att initiera transaktionsformuläret
@@ -11,7 +13,6 @@ function initializeTransactionForm() {
         return;
     }
 
-    // Förifyll datumfältet med dagens datum
     const dateField = document.querySelector("[name='transaction-date']");
     if (dateField) {
         const today = new Date().toISOString().split("T")[0];
@@ -19,6 +20,29 @@ function initializeTransactionForm() {
     }
 
     console.log("Formuläret har initialiserats.");
+}
+
+// ==============================
+// Funktion för att ladda en befintlig transaktion för redigering
+// ==============================
+async function loadTransaction(id) {
+    try {
+        const res = await fetch(`${ENDPOINTS.ecoTransactions}/${id}`);
+        if (!res.ok) throw new Error("Kunde inte hämta transaktion.");
+        const data = await res.json();
+
+        document.querySelector("[name='transaction-date']").value = data.transaction_date;
+        document.querySelector("[name='transaction-description']").value = data.description || "";
+        document.querySelector("[name='transaction-income']").value = data.income || 0;
+        document.querySelector("[name='transaction-expense']").value = data.expense || 0;
+        document.querySelector("[name='vat']").value = data.vat || 0;
+        document.querySelector("[name='is-personal']").checked = !!data.is_personal;
+        document.querySelector("[name='no-vat']").checked = !!data.no_vat;
+
+        console.log("Formulär autofyllt för redigering.");
+    } catch (error) {
+        console.error("Fel vid laddning av transaktion:", error);
+    }
 }
 
 // ==============================
@@ -43,11 +67,12 @@ async function saveTransaction() {
     };
 
     try {
-        const response = await fetch(`${BASE_URL}/eco/add-transaction`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+        const url = editingId ? ENDPOINTS.ecoUpdateTransaction(editingId) : ENDPOINTS.ecoAddTransaction;
+        const method = editingId ? "PUT" : "POST";
+
+        const response = await fetch(url, {
+            method: method,
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(transactionData),
         });
 
@@ -75,11 +100,27 @@ function closeFormAndNavigate() {
 }
 
 // ==============================
+// Funktion för att gömma formuläret
+// ==============================
+function hideForm() {
+    console.log("Stänger formuläret...");
+    window.location.href = "ekonomi.html"; // Navigerar till ekonomi.html
+}
+
+// ==============================
 // Initiera när DOM är redo
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM är redo! Initierar newtrans.js...");
     initializeTransactionForm();
+
+    // Kolla om vi redigerar
+    const urlParams = new URLSearchParams(window.location.search);
+    const idParam = urlParams.get("id");
+    if (idParam) {
+        editingId = idParam;
+        loadTransaction(editingId);
+    }
 
     const saveButton = document.querySelector("[name='save-transaction-button']");
     if (saveButton) {
@@ -91,8 +132,3 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Spara-knappen kunde inte hittas i DOM.");
     }
 });
-
-function hideForm() {
-    console.log("Stänger formuläret...");
-    window.location.href = "ekonomi.html"; // Navigera tillbaka till ekonomi.html
-}

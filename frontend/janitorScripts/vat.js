@@ -1,4 +1,5 @@
-const BASE_URL = "https://my.supportnet.se/api";
+import { BASE_URL, ENDPOINTS } from "../myconfig.js";
+
 let currentPage = 1;
 const itemsPerPage = 12;
 
@@ -23,7 +24,7 @@ async function saveVatAdjustment(event) {
     console.log("Data som skickas till backend:", vatData);
 
     try {
-        const response = await fetch(`${BASE_URL}/eco/vat-summary`, {
+        const response = await fetch(ENDPOINTS.ecoVatSummary, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -54,7 +55,7 @@ async function saveVatAdjustment(event) {
 async function fetchVatTransactions(page) {
     try {
         console.log(`Hämtar transaktioner för sida ${page}...`);
-        const response = await fetch(`${BASE_URL}/eco/vat-transactions?page=${page}&limit=${itemsPerPage}`);
+        const response = await fetch(ENDPOINTS.ecoVatTransactions(page, itemsPerPage));
         if (!response.ok) {
             throw new Error("Misslyckades med att hämta tidigare avstämningar.");
         }
@@ -90,7 +91,6 @@ function renderVatTransactions(transactions, totalPages) {
         tableBody.insertAdjacentHTML("beforeend", row);
     });
 
-    // Uppdatera sidinformation och navigeringsknappar
     document.querySelector("#current-page").textContent = currentPage;
     document.querySelector("#prev-page").disabled = currentPage === 1;
     document.querySelector("#next-page").disabled = currentPage === totalPages;
@@ -142,6 +142,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderCurrentDate();
     fetchVatTransactions(currentPage); // Starta med första sidan
-});
-
- 
+}); 
