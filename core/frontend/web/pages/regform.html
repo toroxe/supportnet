@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Testa MySupportNets AI-tjänst för snabb och enkel tal-till-text.">
+    <link rel="canonical" href="https://my.supportnet.se/pages/regform.html">
+    <link rel="icon" href="/assets/pics/favicon.ico">
+
+    <title>Testa vår AI | MySupportNet</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/styles.css">
+    <link rel="stylesheet" href="/assets/regform.css">
+    <link rel="stylesheet" href="/assets/header.css">
+    <link rel="stylesheet" href="/assets/footer.css">
+</head>
+
+<body id="regform">
+    <div id="header-placeholder"></div>
+
+    <main id="main-content">
+        <section class="test-hero" aria-labelledby="test-title">
+            <div class="test-hero__inner">
+                <h1 id="test-title">Testa vår AI</h1>
+                <p>En liten men kraftfull AI-tjänst för tal-till-text. Snabbt, enkelt och smart.</p>
+            </div>
+        </section>
+
+        <section class="registration-section" aria-labelledby="registration-title">
+            <div class="construction-notice" role="status">
+                <i class="bi bi-tools" aria-hidden="true"></i>
+                <p><strong>Tjänsten är under konstruktion.</strong> Registreringen öppnar när modulen är färdigtestad.</p>
+            </div>
+
+            <div class="registration-layout">
+                <div class="registration-intro">
+                    <h2 id="registration-title">Anmäl dig här</h2>
+                    <p>Formuläret visar vilka uppgifter som kommer att behövas när registreringen öppnar.</p>
+                </div>
+
+                <form name="registerForm" class="registration-form" aria-describedby="construction-message">
+                    <fieldset disabled>
+                        <legend class="visually-hidden">Registreringsuppgifter</legend>
+
+                        <div class="registration-field">
+                            <label for="c_name">Förnamn</label>
+                            <input type="text" id="c_name" name="c_name" autocomplete="given-name" maxlength="100" placeholder="Ange förnamn">
+                        </div>
+
+                        <div class="registration-field">
+                            <label for="s_name">Efternamn</label>
+                            <input type="text" id="s_name" name="s_name" autocomplete="family-name" maxlength="100" placeholder="Ange efternamn">
+                        </div>
+
+                        <div class="registration-field">
+                            <label for="email">E-post</label>
+                            <input type="email" id="email" name="email" autocomplete="email" maxlength="254" placeholder="namn@företag.se">
+                        </div>
+
+                        <div class="registration-field">
+                            <label for="password">Lösenord</label>
+                            <input type="password" id="password" name="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Minst 12 tecken">
+                        </div>
+
+                        <div class="registration-field">
+                            <label for="confirmPassword">Bekräfta lösenord</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Upprepa lösenordet">
+                        </div>
+
+                        <button type="button" disabled>
+                            <i class="bi bi-lock" aria-hidden="true"></i>
+                            Registrering öppnar snart
+                        </button>
+                    </fieldset>
+                </form>
+            </div>
+
+            <p id="construction-message" class="visually-hidden">Registreringsformuläret är avstängt eftersom tjänsten är under konstruktion.</p>
+        </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/render.js"></script>
+</body>
+</html>

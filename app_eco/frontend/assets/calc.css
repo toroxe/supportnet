@@ -1,0 +1,9 @@
+.income-row input {
+    background-color: #e6f8e6; /* ljusgrönt */
+}
+.expense-row input {
+    background-color: #fbe6e6; /* ljusrött */
+}
+#calc-table th, #calc-table td {
+    vertical-align: middle;
+}

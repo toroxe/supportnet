@@ -1,0 +1,323 @@
+# MariaDB HowTo – Supportnet Platform
+
+## 🎯 Syfte
+
+Denna guide beskriver hur vi:
+
+* Sätter upp MariaDB
+* Skapar databaser
+* Skapar users
+* Underhåller databaser
+* Tänker kring säkerhet
+
+---
+
+# ⚙️ Installation
+
+```bash
+sudo apt update
+sudo apt install mariadb-server -y
+```
+
+---
+
+# 🔐 Grundsäkerhet
+
+```bash
+sudo mysql_secure_installation
+```
+
+Rekommenderade val:
+
+* Remove anonymous users → YES
+* Disallow root remote login → YES
+* Remove test DB → YES
+
+---
+
+# 🧱 Databasstruktur
+
+Vi använder separering:
+
+```
+supportnet_db   → applikationsdata
+auth_db         → användare + auth
+```
+
+---
+
+# 🗄️ Skapa databaser
+
+```sql
+CREATE DATABASE supportnet_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE auth_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+---
+
+# 👤 Skapa users
+
+## App user
+
+```sql
+CREATE USER 'app_user'@'192.168.0.%' IDENTIFIED BY 'STRONG_PASSWORD_APP';
+GRANT ALL PRIVILEGES ON supportnet_db.* TO 'app_user'@'192.168.0.%';
+```
+
+## Auth user (begränsad)
+
+```sql
+CREATE USER 'auth_user'@'192.168.0.%' IDENTIFIED BY 'STRONG_PASSWORD_AUTH';
+GRANT SELECT, INSERT, UPDATE ON auth_db.* TO 'auth_user'@'192.168.0.%';
+```
+
+```sql
+FLUSH PRIVILEGES;
+```
+
+---
+
+# 🌐 Tillåt extern access
+
+```bash
+sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+```
+
+Ändra:
+
+```
+bind-address = 0.0.0.0
+```
+
+```bash
+sudo systemctl restart mariadb
+```
+
+---
+
+# 🧪 Testa anslutning
+
+Från app-server:
+
+```bash
+mysql -h 192.168.0.52 -u app_user -p
+```
+
+---
+
+# 🛠️ Underhåll
+
+## Lista databaser
+
+```sql
+SHOW DATABASES;
+```
+
+## Backup
+
+```bash
+mysqldump -u root -p supportnet_db > backup.sql
+```
+
+## Återställ
+
+```bash
+mysql -u root -p supportnet_db < backup.sql
+```
+
+## Status
+
+```bash
+sudo systemctl status mariadb
+```
+
+---
+
+# 🔐 Säkerhetstänk
+
+## Principer
+
+* Separera databaser (app vs auth)
+* Separera users
+* Minimera rättigheter (principle of least privilege)
+* Ingen root-access från nätverket
+
+## Lösenord
+
+* Använd starka lösenord
+* Lagra ALDRIG plaintext
+* Hasha i applikation (bcrypt / argon2)
+
+## Nätverk
+
+* Tillåt endast interna IP (192.168.x.x)
+* Blockera extern DB-access
+
+## Logging
+
+* Aktivera loggar vid behov
+* Övervaka failed logins
+
+---
+
+# 🧠 Designprincip
+
+```
+proxy → app → db
+```
+
+* DB exponeras aldrig direkt
+* All access går via backend
+
+---
+
+# 🚀 Nästa steg
+
+* Koppla FastAPI till MariaDB
+* Lägg till Redis för session/cache
+* Implementera auth-layer
+
+---
+
+✔ Detta är baseline för produktion
+
+---
+
+# ⚡ Redis Setup (Cache & Auth Layer)
+
+## 🎯 Syfte
+
+Redis används som:
+
+* Session store
+* Rate limiting (login)
+* Cache (snabb access)
+* Temporära tokens
+
+---
+
+# ⚙️ Installation
+
+```bash
+sudo apt update
+sudo apt install redis-server -y
+```
+
+---
+
+# 🔐 Grundsäkerhet
+
+Öppna config:
+
+```bash
+sudo nano /etc/redis/redis.conf
+```
+
+## Viktiga inställningar
+
+### Bind (endast internt nät)
+
+```ini
+bind 127.0.0.1 192.168.0.52
+```
+
+### Lösenord
+
+```ini
+requirepass STRONG_REDIS_PASSWORD
+```
+
+### Stäng av farliga kommandon
+
+```ini
+rename-command FLUSHALL ""
+rename-command FLUSHDB ""
+rename-command CONFIG ""
+rename-command SHUTDOWN ""
+```
+
+---
+
+# 🔄 Starta om
+
+```bash
+sudo systemctl restart redis
+sudo systemctl enable redis
+```
+
+---
+
+# 🧪 Test (lokalt)
+
+```bash
+redis-cli
+```
+
+```bash
+AUTH STRONG_REDIS_PASSWORD
+SET test "ok"
+GET test
+```
+
+---
+
+# 🧪 Test (från app01)
+
+```bash
+redis-cli -h 192.168.0.52 -a STRONG_REDIS_PASSWORD
+```
+
+```bash
+SET ping "pong"
+GET ping
+```
+
+---
+
+# 🔐 Brandvägg (valfritt)
+
+```bash
+sudo ufw allow from 192.168.0.55 to any port 6379
+```
+
+---
+
+# 🧠 Användning i plattformen
+
+```txt
+FastAPI → Redis
+```
+
+## Typiska use-cases
+
+* Login attempts (rate limit)
+* Session tokens
+* Temporär cache
+* Snabba lookup-data
+
+---
+
+# ⚠️ Säkerhet
+
+* Exponera aldrig Redis mot internet
+* Använd alltid requirepass
+* Begränsa till interna IP
+* Använd Redis endast via backend (ej direkt från klient)
+
+---
+
+# 🧱 Designprincip
+
+```txt
+proxy → app → redis
+```
+
+Redis är en stödkomponent, inte en primär databas.
+
+---
+
+# 🚀 Nästa steg
+
+* Koppla FastAPI → Redis
+* Implementera rate limiting
+* Implementera session handling

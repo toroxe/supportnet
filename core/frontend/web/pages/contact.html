@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kontakta MySupportNet om AI-stöd, digitalisering och smartare arbetssätt för företag.">
+    <link rel="canonical" href="https://my.supportnet.se/contact">
+    <link rel="icon" href="/assets/pics/favicon.ico">
+
+    <title>Kontakt | MySupportNet</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/styles.css">
+    <link rel="stylesheet" href="/assets/contact.css">
+    <link rel="stylesheet" href="/assets/header.css">
+    <link rel="stylesheet" href="/assets/footer.css">
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main id="main-content">
+        <section class="contact-hero" aria-labelledby="contact-title">
+            <div class="contact-hero__inner">
+                <h1 id="contact-title">Kontakta oss</h1>
+                <p>Berätta vad du vill förenkla, utveckla eller förstå bättre. Vi återkommer så snart vi kan.</p>
+            </div>
+        </section>
+
+        <section class="contact-section" aria-labelledby="contact-form-title">
+            <div class="contact-layout">
+                <div class="contact-intro">
+                    <h2 id="contact-form-title">Vad kan vi hjälpa dig med?</h2>
+                    <p>Skicka några rader om din verksamhet och det du vill komma vidare med.</p>
+                    <p class="contact-intro__note">
+                        <i class="bi bi-shield-check" aria-hidden="true"></i>
+                        Dina uppgifter används bara för att besvara din förfrågan.
+                    </p>
+                </div>
+
+                <form id="contact-form" class="contact-form">
+                    <div class="contact-field">
+                        <label for="name">Namn</label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            autocomplete="name"
+                            maxlength="100"
+                            placeholder="Ditt namn"
+                            required
+                        >
+                    </div>
+
+                    <div class="contact-field">
+                        <label for="email">E-post</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            autocomplete="email"
+                            inputmode="email"
+                            maxlength="254"
+                            placeholder="namn@företag.se"
+                            required
+                        >
+                    </div>
+
+                    <div class="contact-field">
+                        <label for="message">Meddelande</label>
+                        <textarea
+                            id="message"
+                            name="message"
+                            rows="7"
+                            maxlength="5000"
+                            placeholder="Skriv ditt meddelande här"
+                            required
+                        ></textarea>
+                    </div>
+
+                    <button id="contact-submit" type="submit">
+                        <i class="bi bi-send" aria-hidden="true"></i>
+                        <span>Skicka meddelande</span>
+                    </button>
+
+                    <p id="contact-status" class="contact-status" role="status" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <div
+        name="cookieModal"
+        class="modal"
+        tabindex="-1"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cookie-title"
+        style="display: none; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 1050;"
+    >
+        <div class="modal-dialog" style="margin: 15% auto; max-width: 300px; background: white; border-radius: 8px; padding: 20px;">
+            <div class="modal-header">
+                <h2 id="cookie-title" class="modal-title h5">Cookies</h2>
+            </div>
+            <div class="modal-body">
+                <p>Vi använder cookies för att förbättra din upplevelse.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="custom-cookie-btn" type="button" class="btn btn-primary">Acceptera</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/render.js"></script>
+    <script type="module" src="/js/cook.js"></script>
+    <script type="module" src="/js/contact.js"></script>
+</body>
+</html>

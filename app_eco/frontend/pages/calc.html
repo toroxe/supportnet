@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>Kalkyl</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../assets/styles.css" rel="stylesheet">
+    <link href="../janitorAssets/calc.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <header class="bg-primary text-white px-3 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="mb-0 text-center w-100">Kalkyl</h1>
+            <button class="btn btn-light btn-sm position-absolute end-0 me-3" onclick="window.location.href='ekonomi.html'">Stäng</button>
+        </div>
+    </header>
+
+    <main class="container mt-4">
+        <div class="d-flex justify-content-between mb-3">
+            <button class="btn btn-success" onclick="openAddModal('income')">➕ Lägg till Intäkt</button>
+            <button class="btn btn-danger" onclick="openAddModal('expense')">➕ Lägg till Utgift</button>
+        </div>
+        <div class="d-flex justify-content-start align-items-center mb-3 bg-white p-2 rounded shadow-sm" style="max-width: 300px;">
+            <label for="openingBalance" class="form-label me-2 mb-0">Ingående saldo:</label>
+            <input type="number" id="openingBalance" class="form-control form-control-sm" value="0" style="width: 120px;">
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered text-center" id="calc-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Typ</th>
+                        <th>Rubrik</th>
+                        <th>Jan</th>
+                        <th>Feb</th>
+                        <th>Mar</th>
+                        <th>Apr</th>
+                        <th>Maj</th>
+                        <th>Jun</th>
+                        <th>Jul</th>
+                        <th>Aug</th>
+                        <th>Sep</th>
+                        <th>Okt</th>
+                        <th>Nov</th>
+                        <th>Dec</th>
+                        <th>🗑</th>
+                    </tr>
+                </thead>
+                <tbody id="calc-body">
+                    <!-- Dynamiska rader här -->
+                </tbody>
+                <tfoot class="table-secondary fw-bold">
+                    <tr id="total-row">
+                        <td colspan="2">Saldo</td>
+                        <!-- Summerade celler här -->
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal -->
+<div class="modal fade" id="addEntryModal" tabindex="-1" aria-labelledby="addEntryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="addEntryModalLabel">Ny rad</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
+        </div>
+        <div class="modal-body">
+            <form id="entryForm">
+            <div class="mb-3">
+                <label for="entryType" class="form-label">Typ</label>
+                <select class="form-select" id="entryType">
+                <option value="income">Intäkt</option>
+                <option value="expense">Utgift</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="entryLabel" class="form-label">Rubrik</label>
+                <input type="text" class="form-control" id="entryLabel" placeholder="Rubrik">
+            </div>
+            <div class="row">
+                <div class="col-3 mb-2"><label class="form-label" for="month0">Jan</label><input id="month0" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month1">Feb</label><input id="month1" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month2">Mar</label><input id="month2" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month3">Apr</label><input id="month3" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month4">Maj</label><input id="month4" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month5">Jun</label><input id="month5" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month6">Jul</label><input id="month6" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month7">Aug</label><input id="month7" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month8">Sep</label><input id="month8" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month9">Okt</label><input id="month9" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month10">Nov</label><input id="month10" type="number" class="form-control form-control-sm" value="0"></div>
+                <div class="col-3 mb-2"><label class="form-label" for="month11">Dec</label><input id="month11" type="number" class="form-control form-control-sm" value="0"></div>
+            </div>
+
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
+            <button class="btn btn-primary" id="saveEntryBtn">Lägg till</button>
+        </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="../janitorScripts/calc.js"></script>
+</body>
+</html>

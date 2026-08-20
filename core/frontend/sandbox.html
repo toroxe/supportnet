@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sandbox för Tord & AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      background: #f4f4f4;
+      color: #222;
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    textarea {
+      width: 100%;
+      padding: 1em;
+      font-size: 1em;
+      margin-bottom: 1em;
+    }
+    input[type="file"] {
+      margin-bottom: 1em;
+    }
+    button {
+      padding: 0.5em 1em;
+      font-size: 1em;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #222;
+    }
+    pre {
+      background: #eee;
+      padding: 1em;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    img {
+      max-width: 100%;
+      margin-top: 1em;
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      background: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Sandbox – Dokument & Bildtest</h1>
+  <p><strong>Välkommen till din fristad, Tord 💛</strong></p>
+
+  <form id="sandboxForm">
+    <label for="text">Skriv ett meddelande:</label><br />
+    <textarea id="text" rows="5" placeholder="Vad vill du spara idag..."></textarea><br />
+
+    <label for="file">Ladda upp en bild eller dokument:</label><br />
+    <input type="file" id="file" accept="image/*,.pdf,.doc,.docx,.txt" /><br />
+
+    <button type="submit">Spara till backend</button>
+  </form>
+
+  <div id="result" style="margin-top: 2em;">
+    <h2>Respons från servern:</h2>
+    <pre id="jsonOutput">Ingen data ännu...</pre>
+    <div id="imagePreview"></div>
+  </div>
+
+  <script>
+    document.querySelector("#sandboxForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = document.querySelector("#text").value;
+      const file = document.querySelector("#file").files[0];
+
+      if (!file) {
+        alert("Du måste välja en fil att ladda upp.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("user", "Tord");
+      formData.append("text", text);
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+        if (!res.ok) throw new Error("Fel vid uppladdning");
+
+        const data = await res.json();
+        document.querySelector("#jsonOutput").textContent = JSON.stringify(data, null, 2);
+
+        // Visa bild om det är en bild
+        if (data.path && data.path.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+          const img = document.createElement("img");
+          img.src = data.path;
+          document.querySelector("#imagePreview").innerHTML = "";
+          document.querySelector("#imagePreview").appendChild(img);
+        } else {
+          document.querySelector("#imagePreview").innerHTML = "<p>(Ingen bild att visa)</p>";
+        }
+
+      } catch (err) {
+        document.querySelector("#jsonOutput").textContent = "Fel: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

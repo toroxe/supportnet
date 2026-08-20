@@ -1,0 +1,46 @@
+MySupportNet kontaktpaket - UTV/QA
+=================================
+
+Paketet innehåller kompletta ersättningsfiler med bevarad mappstruktur.
+Det ska inte läggas i produktion innan QA-testet nedan är godkänt av Tord.
+
+Installationsordning
+-------------------
+1. Ta backup av de fem befintliga målfilerna.
+2. Ersätt requirements.txt i projektroten.
+3. Aktivera backendens venv och kör:
+   python -m pip install -r requirements.txt
+4. Ersätt core/backend/api/mail.py.
+5. Ersätt frontendfilerna:
+   core/frontend/web/pages/contact.html
+   core/frontend/web/assets/contact.css
+   core/frontend/web/js/contact.js
+6. Kontrollera att backendens main.py inkluderar mail.router med prefixet /api.
+7. Kontrollera att servermiljön innehåller nya, unika värden för:
+   SMTP_SENDER_EMAIL
+   SMTP_PASSWORD
+   CONTACT_RECIPIENT_EMAIL (valfri; befintlig mottagare används annars)
+8. Starta om endast UTV/QA.
+
+QA-test
+-------
+1. Öppna /contact i desktop och mobil.
+2. Kontrollera att header, footer, favicon och formulär visas utan konsolfel.
+3. Skicka ett test med giltigt namn, e-post och meddelande.
+4. Förväntat webbsvar: "Tack! Ditt meddelande är skickat."
+5. Förväntat API-svar: HTTP 200 med {"message":"E-post skickades!"}.
+6. Bekräfta att testmejlet faktiskt finns i mottagarens inkorg.
+7. Testa ogiltig e-post; inget mejl ska skickas.
+8. Testa tillfälligt med felaktig QA-SMTP-konfiguration; besökaren ska få ett
+   generiskt fel och rå SMTP-information ska endast finnas i serverloggen.
+
+Rollback
+--------
+Stoppa UTV/QA, återställ de fem backupfilerna och installera den tidigare
+requirements.txt innan tjänsten startas igen.
+
+Kända kvarvarande risker
+------------------------
+- Den publika endpointen saknar serverbaserad rate limit/spamskydd.
+- Routerprefixet /api är inte verifierat eftersom main.py inte ingick i underlaget.
+- Verklig anslutning till Loopia SMTP har inte körts i Aina_Cores arbetsyta.
