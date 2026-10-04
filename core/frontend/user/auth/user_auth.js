@@ -1,5 +1,9 @@
 // ------------------------------------------------------
-// userAuth.js – Version 3
+// File: core/frontend/user/auth/user_auth.js
+// Version: 3.2
+// Source: Aktuell UTV-fil + läst auth.py och broker-klient
+// Status: VERIFIED
+// Verified: Tord UA/PASS 2026-10-04 – båda inloggningarna
 // ------------------------------------------------------
 
 import { ENDPOINTS } from "/js/myconfig.js";
@@ -7,19 +11,8 @@ import { ENDPOINTS } from "/js/myconfig.js";
 console.log("🔐 userAuth.js laddad...");
 
 // ------------------------------------------------------
-// 🧠 Funktioner
+// Vanlig användarinloggning
 // ------------------------------------------------------
-
-function validateTimeCode(inputCode) {
-    const now = new Date();
-
-    const getTimeCode = (offset = 0) => {
-        const d = new Date(now.getTime() + offset * 60000);
-        return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}`;
-    };
-
-    return [getTimeCode(-1), getTimeCode(0), getTimeCode(1)].includes(inputCode);
-}
 
 async function loginUser() {
     console.log("🔥 Försöker logga in...");
@@ -74,24 +67,61 @@ async function loginUser() {
     console.log("TOKEN:", data.access_token);
 }
 
-function loginAdminUser() {
-    const code = document.querySelector("#admin-code")?.value.trim();
+// ------------------------------------------------------
+// Admininloggning via backend och IAM
+// ------------------------------------------------------
 
-    if (!validateTimeCode(code)) {
-        alert("❌ tick, tack, tick, tack");
+async function loginAdminUser() {
+    const email = document.querySelector("#admin-user")?.value.trim();
+    const password = document.querySelector("#admin-pwd")?.value;
+
+    if (!email || !password) {
+        alert("Fyll i både e-post och lösenord!");
         return;
     }
 
-    console.log("🟢 Tidskod OK, dirigerar till adminDash");
-    window.location.href = `${location.origin}/admin/`;
+    const loginButton = document.querySelector("#janitor-login");
+    if (loginButton) loginButton.disabled = true;
+
+    try {
+        const response = await fetch(ENDPOINTS.login, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Inloggningen nekades (${response.status}): ${errorText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.token || data.user?.iam_decision !== "ALLOW") {
+            throw new Error("IAM har inte godkänt administratörsåtkomst.");
+        }
+
+        sessionStorage.setItem("🔥full_auth", JSON.stringify(data));
+        sessionStorage.setItem("authToken", data.token);
+        sessionStorage.setItem("userData", JSON.stringify(data.user));
+        sessionStorage.setItem("contract_id", data.user.contract_id);
+
+        console.log("Adminlogin: IAM ALLOW");
+        window.location.href = `${location.origin}/admin/`;
+
+    } catch (err) {
+        console.error("Adminlogin misslyckades:", err.message);
+        alert(err.message);
+    } finally {
+        if (loginButton) loginButton.disabled = false;
+    }
 }
 
 // ------------------------------------------------------
-// 🚀 DOMContentLoaded
+// DOMContentLoaded
 // ------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 🧼 Vanlig login
     const loginForm = document.querySelector("#login-form");
     if (loginForm) {
         loginForm.addEventListener("submit", async (e) => {
@@ -100,7 +130,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 🧼 Admin modal open/close
     const janitorBtn = document.querySelector("#janitor-access-btn");
     const janitorModal = document.querySelector("#janitor-modal");
     const janitorCancel = document.querySelector("#janitor-cancel");
@@ -108,9 +137,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     janitorBtn?.addEventListener("click", () => janitorModal.style.display = "block");
     janitorCancel?.addEventListener("click", () => janitorModal.style.display = "none");
-    janitorLoginBtn?.addEventListener("click", loginAdminUser);
+    janitorLoginBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        loginAdminUser();
+    });
 
-    // 🧼 Modal-stängning
     const closeButton = document.querySelector("#close-login");
     if (closeButton) {
         closeButton.addEventListener("click", () => {
@@ -125,7 +156,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 🧼 Autocomplete-hint
     document.querySelector("#mail")?.addEventListener("focus", function () {
         if (this.value === "") {
             console.log("📌 Frågar om användare...");
@@ -133,10 +163,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 🧼 Admin-submit
     document.querySelector("#janitor-login-form")?.addEventListener("submit", (e) => {
         e.preventDefault();
         loginAdminUser();
     });
 });
-
