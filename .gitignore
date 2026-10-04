@@ -38,3 +38,8 @@ README.private.md
 
 # Node (frontend)
 node_modules/
+# Local app databases
+*.db
+app_notes/.venv/
+app_notes.zip
+OLD-app_notes/

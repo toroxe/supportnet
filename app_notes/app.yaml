@@ -1,0 +1,35 @@
+app:
+  id: APP-NOTES-001
+  code: notes
+  name: App Notes
+  version: 0.1.0
+  status: DEVELOPMENT
+
+platform:
+  owner: MySupportNet
+  architecture: MSN-APP
+  smartphone_first: true
+  multi_tenant: true
+
+access:
+  authentication: MSN_IAM
+  permissions:
+    - READ
+    - WRITE
+    - ADMIN
+
+session:
+  required: true
+  central_logging: true
+  log_owner: MSN
+  ai_analysis_allowed: true
+
+data:
+  owner: APP
+  tenant_key: contract_id
+  user_key: user_id
+
+compliance:
+  privacy_by_design: true
+  data_minimization: true
+  audit_ready: true

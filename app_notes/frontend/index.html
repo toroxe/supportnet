@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <title>Notes | MySupportNet</title>
+
+    <link rel="stylesheet" href="notes.css">
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="app-brand">
+            <span class="msn-name">MySupportNet</span>
+            <span class="app-name">Notes</span>
+        </div>
+    </header>
+
+    <main class="app-container">
+
+        <section class="note-editor">
+
+            <textarea
+                id="note"
+                placeholder="Skriv eller tala in din anteckning..."
+                aria-label="Anteckning"></textarea>
+
+            <button
+                id="speechButton"
+                class="btn btn-primary btn-speech"
+                type="button">
+                🎤 Tala
+            </button>
+
+            <div class="editor-actions">
+
+                <button
+                    id="saveButton"
+                    class="btn btn-primary"
+                    type="button">
+                    Spara
+                </button>
+
+                <button
+                    id="copyButton"
+                    class="btn btn-secondary"
+                    type="button">
+                    Kopiera
+                </button>
+
+                <button
+                    id="clearButton"
+                    class="btn btn-secondary"
+                    type="button">
+                    Rensa
+                </button>
+
+            </div>
+
+            <div id="status"
+                 class="status"
+                 aria-live="polite"></div>
+
+        </section>
+
+        <section class="notes-section">
+
+            <h2>Mina anteckningar</h2>
+
+            <div id="notesList"
+                 class="notes-list">
+
+                <div class="empty">
+                    Hämtar anteckningar…
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="app-footer">
+        APP-NOTES-001 · MySupportNet
+    </footer>
+
+    <script src="notes.js"></script>
+
+</body>
+</html>
