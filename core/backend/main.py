@@ -25,6 +25,7 @@ from core.backend.api.contracts import router as contracts_router
 from core.backend.api.blogadmin import router as blog_router
 from core.backend.api.submit_service import router as service_router
 from core.backend.api.industries import router as industries_router
+from core.backend.api.userboard import router as userboard_router
 
 # AUTH
 from core.backend.auth.auth import router as auth_router
@@ -85,7 +86,7 @@ app.include_router(contracts_router, prefix="/api", tags=["Contracts"])
 #app.include_router(eco_router, prefix="/api", tags=["Economy"])
 app.include_router(blog_router, prefix="/api", tags=["blog"])
 app.include_router(auth_router, prefix="/userapi")
-#app.include_router(userboard_router, prefix="/userapi")
+app.include_router(userboard_router, prefix="/userapi")
 #app.include_router(postit_router, prefix="/userapi")
 app.include_router(todo_router, prefix="/userapi")
 app.include_router(task_router, prefix="/userapi")
