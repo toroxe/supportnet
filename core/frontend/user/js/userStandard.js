@@ -9,7 +9,7 @@ console.log("🌍 BASE_URL:", window.BASE_URL);
 // ------------------------------------------------------------
 async function loadHeader(username) {
     try {
-        const res = await fetch("../userpages/userHeader.html");
+        const res = await fetch("userHeader.html");
         const html = await res.text();
         document.querySelector("#header-placeholder").innerHTML = html;
 

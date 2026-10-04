@@ -50,7 +50,7 @@ async function loginUser() {
         console.log("✅ Inloggning lyckades:", data);
 
         sessionStorage.setItem("🔥full_auth", JSON.stringify(data));
-        sessionStorage.setItem("authToken", data.access_token);
+        sessionStorage.setItem("authToken", data.token);
         sessionStorage.setItem("userData", JSON.stringify(data.user));
         sessionStorage.setItem("contract", data.contract);
 
@@ -64,7 +64,7 @@ async function loginUser() {
             console.warn("⚠️ Inget contract_id returnerat!");
         }
 
-        window.location.href = "/userpages/userDashboard.html";
+        window.location.href = "/user/pages/userDashboard.html";
 
     } catch (err) {
         console.error("❌ Inloggning misslyckades:", err.message);

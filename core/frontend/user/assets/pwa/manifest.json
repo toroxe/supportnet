@@ -1,7 +1,7 @@
 {
     "name": "SupportNet",
     "short_name": "SupportNet",
-    "start_url": "/auth/userLogin.html",
+    "start_url": "/user/auth/userLogin.html",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#000000",

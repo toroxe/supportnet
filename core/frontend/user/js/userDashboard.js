@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ------------------------------------------------------------
 async function fetchDashboardData(token) {
     try {
-        const response = await fetch(`${BASE_URL}/dashboard`, {
+        const response = await fetch(`${BASE_URL}dashboard`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -50,12 +50,13 @@ async function fetchDashboardData(token) {
             }
         });
 
+        const text = await response.text();
+
         let result;
 
         try {
-            result = await response.json();
+            result = JSON.parse(text);
         } catch (jsonError) {
-            const text = await response.text();  // läs EN gång!
             console.error("❌ Kunde inte parsa JSON. Server-svar:", text);
             return null;
         }
@@ -64,10 +65,10 @@ async function fetchDashboardData(token) {
 
         if (result.status === "OK") {
             return result;
-        } else {
-            console.warn("⚠️ Dashboard-status:", result.message);
-            return null;
         }
+
+        console.warn("⚠️ Dashboard-status:", result.message);
+        return null;
 
     } catch (err) {
         console.error("❌ Fel vid hämtning av dashboard:", err);
