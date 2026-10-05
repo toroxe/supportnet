@@ -1,0 +1,29 @@
+# File: app_notes/compose.yaml
+# Version: 0.2.0
+# Source: UTV – Notes backend och frontend
+# Status: DEVELOPMENT
+# Verified: Backend CRUD och beständighet UA/PASS; frontend ej testad
+
+name: msn-notes-dev
+
+services:
+  notes:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:18001:8001"
+    volumes:
+      - notes_data:/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "127.0.0.1:18080:80"
+    depends_on:
+      - notes
+
+volumes:
+  notes_data:

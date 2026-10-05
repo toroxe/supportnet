@@ -1,0 +1,17 @@
+# File: app_notes/Dockerfile.frontend
+# Version: 0.1.0
+# Source: UTV – befintlig Notes-frontend
+# Status: DEVELOPMENT
+# Verified: NO
+
+FROM nginx:stable-alpine
+
+COPY frontend/index.html /usr/share/nginx/html/index.html
+COPY frontend/notes.css /usr/share/nginx/html/notes.css
+COPY frontend/notes.js /usr/share/nginx/html/notes.js
+
+RUN sed -i 's|^const API_URL = "http://127.0.0.1:8001";$|const API_URL = "/api";|' /usr/share/nginx/html/notes.js
+
+COPY nginx.notes.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
