@@ -1,13 +1,15 @@
 # File: app_notes/compose.yaml
-# Version: 0.2.0
+# Version: 0.3.0
 # Source: UTV – Notes backend och frontend
-# Status: DEVELOPMENT
-# Verified: Backend CRUD och beständighet UA/PASS; frontend ej testad
+# Status: VERIFIED
+# Verified: Tord UA/PASS 2026-10-05 UTV Notes MSN-access, CRUD och ägarisolering
 
 name: msn-notes-dev
 
 services:
   notes:
+    environment:
+      MSN_NOTES_ACCESS_URL: "${MSN_NOTES_ACCESS_URL:?Ange MSN_NOTES_ACCESS_URL}"
     build:
       context: .
       dockerfile: Dockerfile

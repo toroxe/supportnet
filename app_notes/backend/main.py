@@ -1,19 +1,22 @@
+# File: app_notes/backend/main.py
+# Version: 2026.10.05-01
+# Source: UTV
+# Status: VERIFIED
+# Verified: Tord UA/PASS 2026-10-05 UTV Notes MSN-access, CRUD och ägarisolering
+# ------------------------------------------------------------
+
 from datetime import datetime, timezone
 from pathlib import Path
 import sqlite3
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from .msn_access import get_notes_identity
+
 
 APP_ID = "APP-NOTES-001"
-
-# DEV ONLY.
-# Ersätts senare av verifierad identitet från MSN APP-token.
-DEV_USER_ID = 1
-DEV_CONTRACT_ID = 2
-DEV_IS_ADMIN = False
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_FILE = BASE_DIR / "notes.db"
@@ -88,7 +91,7 @@ def note_to_dict(row):
     }
 
 
-def get_owned_note(db, note_id: int):
+def get_owned_note(db, note_id: int, identity: dict):
     row = db.execute(
         """
         SELECT *
@@ -97,7 +100,11 @@ def get_owned_note(db, note_id: int):
           AND contract_id = ?
           AND user_id = ?
         """,
-        (note_id, DEV_CONTRACT_ID, DEV_USER_ID),
+        (
+            note_id,
+            identity["contract_id"],
+            identity["user_id"],
+        ),
     ).fetchone()
 
     if row is None:
@@ -116,7 +123,7 @@ def health():
 
 
 @app.get("/notes")
-def list_notes():
+def list_notes(identity: dict = Depends(get_notes_identity)):
     with get_db() as db:
         rows = db.execute(
             """
@@ -126,14 +133,17 @@ def list_notes():
               AND user_id = ?
             ORDER BY updated_at DESC
             """,
-            (DEV_CONTRACT_ID, DEV_USER_ID),
+            (identity["contract_id"], identity["user_id"]),
         ).fetchall()
 
         return [note_to_dict(row) for row in rows]
 
 
 @app.post("/notes", status_code=201)
-def create_note(note: NoteCreate):
+def create_note(
+    note: NoteCreate,
+    identity: dict = Depends(get_notes_identity),
+):
     content = note.content.strip()
 
     if not content:
@@ -154,8 +164,8 @@ def create_note(note: NoteCreate):
             VALUES (?, ?, ?, ?, ?)
             """,
             (
-                DEV_CONTRACT_ID,
-                DEV_USER_ID,
+                identity["contract_id"],
+                identity["user_id"],
                 content,
                 now,
                 now,
@@ -173,14 +183,18 @@ def create_note(note: NoteCreate):
 
 
 @app.put("/notes/{note_id}")
-def update_note(note_id: int, note: NoteUpdate):
+def update_note(
+    note_id: int,
+    note: NoteUpdate,
+    identity: dict = Depends(get_notes_identity),
+):
     content = note.content.strip()
 
     if not content:
         raise HTTPException(status_code=400, detail="Empty note")
 
     with get_db() as db:
-        get_owned_note(db, note_id)
+        get_owned_note(db, note_id, identity)
 
         db.execute(
             """
@@ -195,8 +209,8 @@ def update_note(note_id: int, note: NoteUpdate):
                 content,
                 utc_now(),
                 note_id,
-                DEV_CONTRACT_ID,
-                DEV_USER_ID,
+                identity["contract_id"],
+                identity["user_id"],
             ),
         )
 
@@ -209,27 +223,25 @@ def update_note(note_id: int, note: NoteUpdate):
 
 
 @app.delete("/notes/{note_id}")
-def delete_note(note_id: int):
+def delete_note(
+    note_id: int,
+    identity: dict = Depends(get_notes_identity),
+):
     with get_db() as db:
-        row = db.execute(
-            "SELECT * FROM notes WHERE note_id = ?",
-            (note_id,),
-        ).fetchone()
-
-        if row is None:
-            raise HTTPException(status_code=404, detail="Note not found")
-
-        owner = (
-            row["contract_id"] == DEV_CONTRACT_ID
-            and row["user_id"] == DEV_USER_ID
-        )
-
-        if not owner and not DEV_IS_ADMIN:
-            raise HTTPException(status_code=403, detail="Delete forbidden")
+        get_owned_note(db, note_id, identity)
 
         db.execute(
-            "DELETE FROM notes WHERE note_id = ?",
-            (note_id,),
+            """
+            DELETE FROM notes
+            WHERE note_id = ?
+              AND contract_id = ?
+              AND user_id = ?
+            """,
+            (
+                note_id,
+                identity["contract_id"],
+                identity["user_id"],
+            ),
         )
 
     return {"status": "deleted", "note_id": note_id}

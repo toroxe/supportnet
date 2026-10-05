@@ -1,3 +1,10 @@
+// File: app_notes/frontend/notes.js
+// Version: 2026.10.05-01
+// Source: UTV
+// Status: VERIFIED
+// Verified: Tord UA/PASS 2026-10-05 UTV browser CRUD med Bearer-token
+// ------------------------------------------------------------
+
 const API_URL = "http://127.0.0.1:8001";
 
 const noteField = document.getElementById("note");
@@ -20,9 +27,31 @@ function setStatus(message) {
 
 /* ---------- NOTES API ---------- */
 
+async function notesFetch(url, options = {}) {
+    const token = sessionStorage.getItem("authToken");
+
+    if (!token) {
+        setStatus("Logga in via MySupportNet för att använda Notes.");
+        throw new Error("MSN-token saknas");
+    }
+
+    const headers = new Headers(options.headers);
+    headers.set("Authorization", `Bearer ${token}`);
+
+    const response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401 || response.status === 403) {
+        setStatus("Inloggningen har gått ut eller åtkomst till Notes saknas.");
+    }
+
+    return response;
+}
+
+
+
 async function loadNotes() {
     try {
-        const response = await fetch(`${API_URL}/notes`);
+        const response = await notesFetch(`${API_URL}/notes`);
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -98,7 +127,7 @@ async function saveNote() {
         let response;
 
         if (currentNoteId === null) {
-            response = await fetch(`${API_URL}/notes`, {
+            response = await notesFetch(`${API_URL}/notes`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -106,7 +135,7 @@ async function saveNote() {
                 body: JSON.stringify({ content })
             });
         } else {
-            response = await fetch(
+            response = await notesFetch(
                 `${API_URL}/notes/${currentNoteId}`,
                 {
                     method: "PUT",
@@ -134,7 +163,7 @@ async function saveNote() {
 
 async function deleteNote(noteId) {
     try {
-        const response = await fetch(
+        const response = await notesFetch(
             `${API_URL}/notes/${noteId}`,
             { method: "DELETE" }
         );

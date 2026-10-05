@@ -1,8 +1,8 @@
 # File: app_notes/Dockerfile
-# Version: 0.1.0
+# Version: 0.2.0
 # Source: UTV – aktuell Notes-backend, Python 3.12
-# Status: DEVELOPMENT
-# Verified: NO
+# Status: VERIFIED
+# Verified: Tord UA/PASS 2026-10-05 UTV Notes MSN-access, CRUD och ägarisolering
 
 FROM python:3.12-slim
 
@@ -15,6 +15,7 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY backend/main.py /app/backend/main.py
+COPY backend/msn_access.py /app/backend/msn_access.py
 RUN mkdir -p /data && ln -s /data/notes.db /app/backend/notes.db
 
 EXPOSE 8001
