@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Survey | MySupportNet</title>
+    <link rel="stylesheet" href="survey.css">
+    <script src="survey.js" defer></script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <div class="brand">
+                <span>MySupportNet</span>
+                <strong>Survey</strong>
+            </div>
+            <nav aria-label="Appnavigation">
+                <button id="helpButton" type="button"
+                        aria-label="Instruktion för formulärbyggaren"
+                        aria-controls="helpDialog">?</button>
+                <button id="dashboardButton" type="button">Dashboard</button>
+                <button id="logoutButton" type="button">Logga ut</button>
+            </nav>
+        </div>
+    </header>
+
+    <dialog id="helpDialog" aria-labelledby="helpTitle">
+        <div class="section-heading">
+            <h2 id="helpTitle">Så bygger du en undersökning</h2>
+            <button id="closeHelpButton" type="button">Stäng</button>
+        </div>
+
+        <ol>
+            <li>
+                Välj <strong>Ny undersökning</strong> eller
+                <strong>Mall: verksamhetsanalys</strong>.
+                Ange undersökningens namn, rubrik och introduktion.
+                Exempeltexterna i tomma fält sparas inte.
+            </li>
+            <li>
+                Lägg till frågor. Ange en rubrik, välj svarstyp
+                och markera vilka frågor som är obligatoriska.
+                Frågorna numreras automatiskt.
+            </li>
+            <li>
+                Kort och lång text används för fritext.
+                Rullista och radioknappar ger ett val.
+                Kryssrutor tillåter flera val.
+                Ange ett svarsalternativ per rad.
+            </li>
+            <li>
+                Välj <strong>Datum</strong> för datum och
+                <strong>Tal</strong> för numeriska värden.
+                Använd hjälptext för att förklara vad svaret ska innehålla.
+            </li>
+            <li>
+                Välj <strong>Summafält</strong> och kryssa för de
+                talfält som ska summeras. Listan visar frågornas
+                nummer och rubriker. Kopplingarna följer med när
+                du flyttar frågor.
+            </li>
+            <li>
+                Summan visas med högst två decimaler.
+                Beräkningen behåller precisionen fram till slutresultatet.
+                Tomma talfält lämnar summan tom;
+                ange 0 när värdet ska vara noll.
+            </li>
+            <li>
+                Markera <strong>Dölj för respondenten</strong> om
+                summans rubrik och resultat inte ska visas i formuläret.
+                Ett dolt summafält kräver inget extra svar.
+                När svarshanteringen är på plats beräknas resultatet
+                i backend och visas för undersökningens ägare.
+            </li>
+            <li>
+                Flytta frågor med pilarna. Om ett talfält som används
+                i en summa tas bort eller byter typ måste du
+                ändra summafältets val innan formuläret kan godkännas.
+            </li>
+            <li>
+                Klicka <strong>Förhandsgranska</strong> efter ändringar.
+                Här ser du respondentens vy, där dolda summafält
+                inte visas. <strong>Prova formuläret</strong>
+                kontrollerar svaren utan att spara dem.
+            </li>
+            <li>
+                <strong>Hämta JSON</strong> hämtar formulärets definition.
+                Lagra filen så att du har kvar arbetet under testningen.
+                Databassparande kräver MSN-inloggning,
+                Survey-behörighet och uppdaterad backend.
+            </li>
+        </ol>
+
+        <p class="muted">
+            Vi testar nu formulärbyggaren. Deltagarlistor,
+            personliga länkar, utskick och lagring av respondentsvar
+            kommer i nästa steg.
+        </p>
+    </dialog>
+
+    <main class="app-container">
+        <section class="panel">
+            <h1>Mina undersökningar</h1>
+            <div class="actions">
+                <button id="newButton" type="button">Ny undersökning</button>
+                <button id="templateButton" type="button" class="secondary">
+                    Mall: verksamhetsanalys
+                </button>
+                <button id="refreshButton" type="button" class="secondary">
+                    Hämta lista
+                </button>
+            </div>
+            <div id="surveyList" class="survey-list">
+                Listan hämtas när du är inloggad.
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Bygg formuläret</h2>
+
+            <label for="surveyName">Undersökningens namn</label>
+            <input id="surveyName" type="text" maxlength="200"
+                   placeholder="Exempel: MinUndersökning_01">
+
+            <label for="surveyTitle">Rubrik för respondenten</label>
+            <input id="surveyTitle" type="text" maxlength="200"
+                   placeholder="Exempel: Hur fungerar er verksamhet idag?">
+
+            <label for="surveyIntroduction">Introduktion</label>
+            <textarea id="surveyIntroduction" rows="3" maxlength="5000"
+                      placeholder="Beskriv syftet och hur respondenten ska svara."></textarea>
+
+            <div class="section-heading">
+                <h3>Frågor</h3>
+                <button id="addQuestionButton" type="button">
+                    Lägg till fråga
+                </button>
+            </div>
+
+            <div id="questionEditor"></div>
+
+            <div class="actions">
+                <button id="previewButton" type="button" class="secondary">
+                    Förhandsgranska
+                </button>
+                <button id="saveButton" type="button">Spara undersökning</button>
+                <button id="exportButton" type="button" class="secondary">
+                    Hämta JSON
+                </button>
+            </div>
+
+            <p id="versionInfo" class="muted"></p>
+            <p id="status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
+            <h2>Respondentens vy – förhandsgranskning</h2>
+            <p class="muted">
+                Här provar du formuläret. Inga respondentsvar sparas ännu.
+            </p>
+            <div id="formPreview"></div>
+        </section>
+    </main>
+
+    <footer>APP-SURVEY-001 · MySupportNet</footer>
+</body>
+</html>

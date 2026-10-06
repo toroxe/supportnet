@@ -21,6 +21,7 @@ class User(Base):
     c_name = Column(String(255), nullable=False)
     s_name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
+    aina_uid = Column(String(100), unique=True, nullable=True)
     role = Column(String(50), nullable=False, default="PROSPECT")
     status = Column(String(50), nullable=False, default="PROSPECT")
     password_hash = Column(String(255), nullable=False)
@@ -291,38 +292,6 @@ class ServiceRequest(Base):
 # ---------------------------------------------------------------
 # Hanterar fälten för use case - survey
 # ---------------------------------------------------------------
-
-class Usecase(Base):
-    __tablename__ = "usecases"
-    __table_args__ = {'extend_existing': True}
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-
-    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="SET NULL"), nullable=True)
-    contract_id = Column(Integer, ForeignKey("contracts.contract_id", ondelete="CASCADE"), nullable=False)
-
-    created_date = Column(Date, default=date.today, nullable=False)
-    username = Column(String(100), nullable=False)
-
-    frustration = Column(Text, nullable=False)
-    waste = Column(Text, nullable=True)
-    critical = Column(Text, nullable=True)
-    errors = Column(Text, nullable=True)
-    unused_data = Column(Text, nullable=True)
-
-    feedback_time = Column(
-        ENUM("omedelbart", "inom timmar", "inom dagar", "aldrig riktigt säkert", name="feedback_enum"),
-        nullable=True
-    )
-
-    accounting = Column(Text, nullable=True)
-    erp_system = Column(String(100), nullable=True)
-
-    analysis = Column(Text, nullable=True)
-    suggestions = Column(Text, nullable=True)
-
-    class Config:
-        from_attributes = True
 
 # -----------------------------------------------------------
 # Ny tabell: Branscher (Industries)

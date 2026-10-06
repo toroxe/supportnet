@@ -1,9 +1,7 @@
 # File: core/backend/api/userboard.py
-# Version: 2026.10.05-01
+# Version: 2026.10.06-01
 # Source: UTV
-# Status: VERIFIED
-# Verified: Tord UA/PASS 2026-10-05 UTV: Notes access 401/403/200, fel kontrakt 403, dashboard 200
-# ------------------------------------------------------------
+# Status: DEVELOPMENT – Survey access ännu inte testad
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -93,6 +91,51 @@ def get_notes_access(
 
     return {
         "app_id": "APP-NOTES-001",
+        "decision": "ALLOW",
+        "user_id": user.user_id,
+        "contract_id": user.contract_id,
+    }
+
+
+@router.get("/apps/survey/access")
+def get_survey_access(
+    token_data: dict = Depends(verify_token),
+    db: Session = Depends(get_db),
+):
+    user = (
+        db.query(User)
+        .filter(User.user_id == token_data["user_id"])
+        .first()
+    )
+
+    if (
+        user is None
+        or not user.active
+        or str(user.status).upper() != "ACTIVE"
+        or user.contract_id != token_data["contract_id"]
+    ):
+        raise HTTPException(status_code=403, detail="Survey access denied")
+
+    contract = (
+        db.query(Contract)
+        .filter(Contract.contract_id == user.contract_id)
+        .first()
+    )
+
+    if contract is None or not contract.status:
+        raise HTTPException(status_code=403, detail="Survey access denied")
+
+    services = (
+        db.query(ContractServices)
+        .filter(ContractServices.contract_id == user.contract_id)
+        .first()
+    )
+
+    if services is None or not services.survey:
+        raise HTTPException(status_code=403, detail="Survey access denied")
+
+    return {
+        "app_id": "APP-SURVEY-001",
         "decision": "ALLOW",
         "user_id": user.user_id,
         "contract_id": user.contract_id,

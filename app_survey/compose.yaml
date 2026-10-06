@@ -1,0 +1,26 @@
+name: msn-survey-dev
+
+services:
+  survey:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MSN_SURVEY_ACCESS_URL: "${MSN_SURVEY_ACCESS_URL:?Ange MSN_SURVEY_ACCESS_URL}"
+      SURVEY_DB_PATH: /data/survey.db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - survey_data:/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "127.0.0.1:18090:80"
+    depends_on:
+      - survey
+
+volumes:
+  survey_data:

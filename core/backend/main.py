@@ -93,7 +93,6 @@ app.include_router(task_router, prefix="/userapi")
 app.include_router(doc_router, prefix="/api")
 app.include_router(mydocs_router, prefix="/api")
 app.include_router(service_router, prefix="/api", tags=["Services"])
-#app.include_router(usecase_router, prefix="/userapi")
 app.include_router(industries_router, prefix="/api", tags=["Industries"])
 
 # ------------------------------------------------------------------------

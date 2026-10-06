@@ -96,7 +96,7 @@ function renderServices(services) {
         "To-Do List": "/userpages/todo.html",
         "Post-It Notes": "/apps/notes/",
         "Inbound Management": "/userpages/inbound.html",
-        "Survey Access": "/userpages/usecase.html"
+        "Survey Access": "/apps/survey/"
     };
 
     const userId = sessionStorage.getItem("user_id");
