@@ -399,3 +399,71 @@ footer {
         padding: 16px;
     }
 }
+
+/* Kompakt respondentlista med färg och statustext */
+#invitationList { overflow-x: auto; }
+#invitationList .respondent-row {
+    display: grid;
+    grid-template-columns: 150px 150px repeat(4, 145px) auto;
+    align-items: center;
+    gap: 12px;
+    min-width: 1000px;
+    border-left: 6px solid #2563eb;
+}
+#invitationList .respondent-row h3,
+#invitationList .respondent-row p { margin: 0; }
+#invitationList .respondent-row h3 { font-size: 14px; }
+#invitationList .respondent-row p { font-size: 13px; }
+#invitationList .respondent-row dl { display: contents; }
+#invitationList .respondent-row dt { display: none; }
+#invitationList .respondent-row dd { margin: 0; font-size: 12px; }
+#invitationList .respondent-row dd::before { display: block; font-weight: bold; }
+#invitationList .respondent-row dd:nth-of-type(1)::before { content: "Skapad"; }
+#invitationList .respondent-row dd:nth-of-type(2)::before { content: "Skickad"; }
+#invitationList .respondent-row dd:nth-of-type(3)::before { content: "Besvarad"; }
+#invitationList .respondent-row dd:nth-of-type(4)::before { content: "Sista svarsdag"; }
+#invitationList .respondent-row .actions { margin: 0; }
+#invitationList [data-status="CREATED"] { border-left-color: #2563eb; background: #eff6ff; }
+#invitationList [data-status="SENT"] { border-left-color: #ca8a04; background: #fefce8; }
+#invitationList [data-status="ANSWERED"] { border-left-color: #15803d; background: #f0fdf4; }
+#invitationList [data-status="EXPIRED"] { border-left-color: #b91c1c; background: #fef2f2; }
+#invitationList [data-status="REVOKED"] { border-left-color: #64748b; background: #f1f5f9; }
+
+
+/* Utfällbara delar */
+.page-title { margin: 0 0 16px; }
+.accordion > summary,
+.accordion-inner > summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--navy);
+    padding: 8px 0;
+    overflow-wrap: anywhere;
+}
+.accordion > summary { font-size: 20px; }
+.accordion-inner > summary { font-size: 17px; }
+.accordion-note {
+    font-size: 13px;
+    font-weight: 400;
+    margin-left: 10px;
+}
+.accordion-content { padding-top: 12px; }
+.accordion-inner {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+}
+.builder-actions { margin-top: 16px; }
+summary:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+}
+
+
+#surveyList .selected-survey,
+#surveyList .selected-survey:hover {
+    background: #e8f5e9;
+    border-color: #15803d;
+    color: #071a38;
+}

@@ -6,6 +6,8 @@
     <title>Survey | MySupportNet</title>
     <link rel="stylesheet" href="survey.css">
     <script src="survey.js" defer></script>
+    <script src="invitations.js" defer></script>
+    <script src="accordion.js" defer></script>
 </head>
 <body>
     <header class="app-header">
@@ -26,20 +28,28 @@
 
     <dialog id="helpDialog" aria-labelledby="helpTitle">
         <div class="section-heading">
-            <h2 id="helpTitle">Så bygger du en undersökning</h2>
+            <h2 id="helpTitle">Så arbetar du med undersökningar</h2>
             <button id="closeHelpButton" type="button">Stäng</button>
         </div>
-
         <ol>
             <li>
-                Välj <strong>Ny undersökning</strong> eller
-                <strong>Mall: verksamhetsanalys</strong>.
-                Ange undersökningens namn, rubrik och introduktion.
+                Klicka på en av sidans rubriker för att öppna
+                eller stänga den delen. Dina ifyllda värden finns kvar.
+            </li>
+            <li>
+                Välj Ny undersökning eller Mall: verksamhetsanalys.
+                Under Huvud anger du namn, sista svarsdag,
+                rubrik och introduktion.
                 Exempeltexterna i tomma fält sparas inte.
             </li>
             <li>
-                Lägg till frågor. Ange en rubrik, välj svarstyp
-                och markera vilka frågor som är obligatoriska.
+                Sista svarsdag är obligatorisk. Svar tas emot till
+                dagens slut, svensk tid. Datumet gäller undersökningens
+                obesvarade länkar och kan ändras genom att spara.
+            </li>
+            <li>
+                Under Frågor anger du rubrik, svarstyp, hjälptext
+                och vilka frågor som är obligatoriska.
                 Frågorna numreras automatiskt.
             </li>
             <li>
@@ -49,117 +59,222 @@
                 Ange ett svarsalternativ per rad.
             </li>
             <li>
-                Välj <strong>Datum</strong> för datum och
-                <strong>Tal</strong> för numeriska värden.
-                Använd hjälptext för att förklara vad svaret ska innehålla.
+                Välj Datum för datum och Tal för numeriska värden.
             </li>
             <li>
-                Välj <strong>Summafält</strong> och kryssa för de
-                talfält som ska summeras. Listan visar frågornas
-                nummer och rubriker. Kopplingarna följer med när
-                du flyttar frågor.
-            </li>
-            <li>
-                Summan visas med högst två decimaler.
-                Beräkningen behåller precisionen fram till slutresultatet.
-                Tomma talfält lämnar summan tom;
+                Summafält summerar valda talfält och visar högst två
+                decimaler. Tomma källfält ger en tom summa;
                 ange 0 när värdet ska vara noll.
+                Kopplingarna följer med när frågorna flyttas.
             </li>
             <li>
-                Markera <strong>Dölj för respondenten</strong> om
-                summans rubrik och resultat inte ska visas i formuläret.
-                Ett dolt summafält kräver inget extra svar.
-                När svarshanteringen är på plats beräknas resultatet
-                i backend och visas för undersökningens ägare.
+                Dölj för respondenten döljer summafältet.
+                Backend beräknar resultatet när svaret skickas in.
+                Resultatet ingår i ägarens JSON.
             </li>
             <li>
-                Flytta frågor med pilarna. Om ett talfält som används
-                i en summa tas bort eller byter typ måste du
-                ändra summafältets val innan formuläret kan godkännas.
+                Om ett talfält tas bort eller byter svarstyp,
+                ändra summafältets kopplingar innan du sparar.
             </li>
             <li>
-                Klicka <strong>Förhandsgranska</strong> efter ändringar.
-                Här ser du respondentens vy, där dolda summafält
-                inte visas. <strong>Prova formuläret</strong>
-                kontrollerar svaren utan att spara dem.
+                Förhandsgranska och Prova formuläret används för test.
+                Testsvaren sparas inte.
+                Spara, Förhandsgranska och Hämta JSON ligger utanför
+                delarna Huvud och Frågor.
             </li>
             <li>
-                <strong>Hämta JSON</strong> hämtar formulärets definition.
-                Lagra filen så att du har kvar arbetet under testningen.
-                Databassparande kräver MSN-inloggning,
-                Survey-behörighet och uppdaterad backend.
+                Spara undersökningen. Varje sparad ändring skapar
+                en ny formulärversion.
+                Öppna sparade undersökningar från listan.
+            </li>
+            <li>
+                Under Respondenter och länkar anger du ett namn
+                eller en intern etikett och skapar en personlig länk.
+                Länken knyts till den sparade formulärversionen.
+            </li>
+            <li>
+                Kopiera och spara länken direkt. Skicka den själv
+                via mail, SMS eller annat medium och markera Skickad.
+                Länken visas inte igen efter att du lämnat sidan.
+            </li>
+            <li>
+                Respondenten behöver ingen MSN-inloggning.
+                Länken gäller tills svarstiden gått ut, svaret
+                skickats in eller länken återkallats.
+                Besvarad och tidpunkten registreras automatiskt.
+            </li>
+            <li>
+                Blå betyder Skapad, gul Skickad, grön Besvarad,
+                röd Utgången och grå Återkallad.
+                På små skärmar kan respondentlistan rullas i sidled.
+            </li>
+            <li>
+                Hämta svar som JSON hämtar undersökningens svar,
+                formulärversioner och beräknade värden.
             </li>
         </ol>
-
-        <p class="muted">
-            Vi testar nu formulärbyggaren. Deltagarlistor,
-            personliga länkar, utskick och lagring av respondentsvar
-            kommer i nästa steg.
-        </p>
     </dialog>
 
     <main class="app-container">
-        <section class="panel">
-            <h1>Mina undersökningar</h1>
-            <div class="actions">
-                <button id="newButton" type="button">Ny undersökning</button>
-                <button id="templateButton" type="button" class="secondary">
-                    Mall: verksamhetsanalys
-                </button>
-                <button id="refreshButton" type="button" class="secondary">
-                    Hämta lista
-                </button>
+        <h1 class="page-title">Mina undersökningar</h1>
+
+        <details id="surveysAccordion" class="panel accordion" open>
+            <summary>
+                <span>Undersökningslista</span>
+            </summary>
+            <div class="accordion-content">
+                <div class="actions">
+                    <button id="newButton" type="button">
+                        Ny undersökning
+                    </button>
+                    <button id="templateButton" type="button"
+                            class="secondary">
+                        Mall: verksamhetsanalys
+                    </button>
+                    <button id="refreshButton" type="button"
+                            class="secondary">
+                        Hämta lista
+                    </button>
+                </div>
+                <div id="surveyList" class="survey-list">
+                    Listan hämtas när du är inloggad.
+                </div>
             </div>
-            <div id="surveyList" class="survey-list">
-                Listan hämtas när du är inloggad.
+        </details>
+
+        <details id="builderAccordion" class="panel accordion">
+            <summary>
+                <span>Bygg formuläret</span>
+                <span id="builderSummary" class="accordion-note"></span>
+            </summary>
+            <div class="accordion-content">
+                <details id="headAccordion" class="accordion-inner" open>
+                    <summary>Huvud</summary>
+                    <div class="accordion-content">
+                        <label for="surveyName">Undersökningens namn</label>
+                        <input id="surveyName" type="text" maxlength="200"
+                               placeholder="Exempel: MinUndersökning_01">
+
+                        <label for="surveyClosesOn">Sista svarsdag *</label>
+                        <input id="surveyClosesOn" type="date" required>
+                        <p class="muted">
+                            Obligatoriskt. Svar tas emot till dagens slut,
+                            svensk tid.
+                        </p>
+
+                        <label for="surveyTitle">
+                            Rubrik för respondenten
+                        </label>
+                        <input id="surveyTitle" type="text" maxlength="200"
+                               placeholder="Exempel: Hur fungerar er verksamhet idag?">
+
+                        <label for="surveyIntroduction">Introduktion</label>
+                        <textarea id="surveyIntroduction" rows="3"
+                                  maxlength="5000"
+                                  placeholder="Beskriv syftet och hur respondenten ska svara."></textarea>
+                    </div>
+                </details>
+
+                <details id="questionsAccordion" class="accordion-inner">
+                    <summary>
+                        <span>Frågor</span>
+                        <span id="questionCount"
+                              class="accordion-note"></span>
+                    </summary>
+                    <div class="accordion-content">
+                        <div class="actions">
+                            <button id="addQuestionButton" type="button">
+                                Lägg till fråga
+                            </button>
+                        </div>
+                        <div id="questionEditor"></div>
+                    </div>
+                </details>
+
+                <div class="actions builder-actions">
+                    <button id="previewButton" type="button"
+                            class="secondary">
+                        Förhandsgranska
+                    </button>
+                    <button id="saveButton" type="button">
+                        Spara undersökning
+                    </button>
+                    <button id="exportButton" type="button"
+                            class="secondary">
+                        Hämta JSON
+                    </button>
+                </div>
+
+                <p id="versionInfo" class="muted"></p>
+                <p id="status" role="status" aria-live="polite"></p>
             </div>
-        </section>
+        </details>
 
-        <section class="panel">
-            <h2>Bygg formuläret</h2>
+        <details id="invitationsAccordion" class="panel accordion">
+            <summary>
+                <span id="invitationHeading">Respondenter och länkar</span>
+                <span id="respondentCount"
+                      class="accordion-note"></span>
+            </summary>
+            <div class="accordion-content">
+                <p id="invitationContext" class="muted">
+                    Spara eller öppna en undersökning först.
+                </p>
 
-            <label for="surveyName">Undersökningens namn</label>
-            <input id="surveyName" type="text" maxlength="200"
-                   placeholder="Exempel: MinUndersökning_01">
+                <label for="respondentLabel">Namn eller intern etikett</label>
+                <input id="respondentLabel" type="text" maxlength="100"
+                       placeholder="Exempel: Karin – första testet">
 
-            <label for="surveyTitle">Rubrik för respondenten</label>
-            <input id="surveyTitle" type="text" maxlength="200"
-                   placeholder="Exempel: Hur fungerar er verksamhet idag?">
+                <div class="actions">
+                    <button id="createInvitationButton" type="button"
+                            disabled>
+                        Skapa personlig länk
+                    </button>
+                    <button id="refreshInvitationsButton" type="button"
+                            class="secondary" disabled>
+                        Hämta respondentlista
+                    </button>
+                    <button id="exportResponsesButton" type="button"
+                            class="secondary" disabled>
+                        Hämta svar som JSON
+                    </button>
+                </div>
 
-            <label for="surveyIntroduction">Introduktion</label>
-            <textarea id="surveyIntroduction" rows="3" maxlength="5000"
-                      placeholder="Beskriv syftet och hur respondenten ska svara."></textarea>
+                <div id="createdInvitation" hidden>
+                    <h3>Ny personlig länk</h3>
+                    <p class="muted">
+                        Kopiera och spara länken nu. Den visas inte igen
+                        efter att du lämnat sidan.
+                    </p>
+                    <label for="invitationUrl">Länk till formuläret</label>
+                    <input id="invitationUrl" type="text" readonly>
+                    <div class="actions">
+                        <button id="copyInvitationButton" type="button">
+                            Kopiera länken
+                        </button>
+                        <button id="markCreatedSentButton" type="button"
+                                class="secondary">
+                            Markera skickad
+                        </button>
+                    </div>
+                </div>
 
-            <div class="section-heading">
-                <h3>Frågor</h3>
-                <button id="addQuestionButton" type="button">
-                    Lägg till fråga
-                </button>
+                <p id="invitationStatus" role="status"
+                   aria-live="polite"></p>
+                <div id="invitationList"></div>
             </div>
+        </details>
 
-            <div id="questionEditor"></div>
-
-            <div class="actions">
-                <button id="previewButton" type="button" class="secondary">
-                    Förhandsgranska
-                </button>
-                <button id="saveButton" type="button">Spara undersökning</button>
-                <button id="exportButton" type="button" class="secondary">
-                    Hämta JSON
-                </button>
+        <details id="previewAccordion" class="panel accordion">
+            <summary>Förhandsgranskning</summary>
+            <div class="accordion-content">
+                <p class="muted">
+                    Här provar du respondentens formulär.
+                    Testsvaren sparas inte.
+                </p>
+                <div id="formPreview"></div>
             </div>
-
-            <p id="versionInfo" class="muted"></p>
-            <p id="status" role="status" aria-live="polite"></p>
-        </section>
-
-        <section class="panel">
-            <h2>Respondentens vy – förhandsgranskning</h2>
-            <p class="muted">
-                Här provar du formuläret. Inga respondentsvar sparas ännu.
-            </p>
-            <div id="formPreview"></div>
-        </section>
+        </details>
     </main>
 
     <footer>APP-SURVEY-001 · MySupportNet</footer>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>Undersökning | MySupportNet</title>
+    <link rel="stylesheet" href="survey.css">
+    <script src="respond.js" defer></script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <div class="brand">
+                <span>MySupportNet</span>
+                <strong>Survey</strong>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <section class="panel">
+            <h1 id="responseTitle">Hämtar undersökningen…</h1>
+            <p id="responseIntroduction"
+               style="white-space: pre-wrap"></p>
+
+            <p id="responseInstructions" class="muted" hidden>
+                Frågor märkta med * är obligatoriska.
+                Dina svar sparas när du väljer Skicka svar.
+            </p>
+
+            <form id="responseForm" hidden>
+                <div id="responseQuestions"></div>
+                <div class="actions">
+                    <button id="submitResponseButton" type="submit">
+                        Skicka svar
+                    </button>
+                </div>
+            </form>
+
+            <p id="responseStatus" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <footer>MySupportNet · Undersökningar</footer>
+</body>
+</html>

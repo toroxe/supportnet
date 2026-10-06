@@ -1,12 +1,12 @@
 # File: app_survey/backend/main.py
-# Version: 2026.10.06-02
+# Version: 2026.10.06-04
 # Status: DEVELOPMENT
 
 import json
 import os
 import sqlite3
 from contextlib import asynccontextmanager, closing
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Literal
 from uuid import uuid4
@@ -15,6 +15,11 @@ from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from backend.msn_access import get_survey_identity
+from backend.invitations import (
+    initialize_invitations,
+    register_invitation_routes,
+)
+from backend.deadlines import initialize_deadlines, validate_deadline
 
 
 DB_PATH = Path(os.getenv("SURVEY_DB_PATH", "/data/survey.db"))
@@ -61,6 +66,8 @@ async def lifespan(app):
                     REFERENCES surveys(survey_id)
             );
         """)
+        initialize_deadlines(db)
+        initialize_invitations(db)
         db.commit()
 
     yield
@@ -68,7 +75,7 @@ async def lifespan(app):
 
 app = FastAPI(
     title="MySupportNet Survey",
-    version="0.2.0",
+    version="0.4.0",
     lifespan=lifespan,
 )
 
@@ -165,6 +172,7 @@ class CreateSurvey(BaseModel):
     )
 
     name: str = Field(min_length=1, max_length=200)
+    closes_on: date
     form: SurveyForm
 
 
@@ -203,6 +211,7 @@ def survey_result(db, row):
         "survey_id": row["survey_id"],
         "name": row["name"],
         "version": row["current_version"],
+        "closes_on": row["closes_on"],
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
         "form": json.loads(version["form_json"]),
@@ -214,7 +223,7 @@ def health():
     return {
         "status": "ok",
         "app_id": "APP-SURVEY-001",
-        "version": "0.2.0",
+        "version": "0.4.0",
     }
 
 
@@ -224,7 +233,7 @@ def list_surveys(identity=Depends(get_survey_identity)):
         rows = db.execute(
             """
             SELECT survey_id, name, current_version AS version,
-                   created_at, updated_at
+                   closes_on, created_at, updated_at
             FROM surveys
             WHERE user_id = ? AND contract_id = ?
             ORDER BY updated_at DESC
@@ -240,6 +249,7 @@ def create_survey(
     payload: CreateSurvey,
     identity=Depends(get_survey_identity),
 ):
+    closes_on = validate_deadline(payload.closes_on)
     survey_id = str(uuid4())
     now = timestamp()
     form_json = json.dumps(
@@ -252,12 +262,13 @@ def create_survey(
                 """
                 INSERT INTO surveys
                 (survey_id, user_id, contract_id, name,
-                 current_version, created_at, updated_at)
-                VALUES (?, ?, ?, ?, 1, ?, ?)
+                 current_version, closes_on, created_at, updated_at)
+                VALUES (?, ?, ?, ?, 1, ?, ?, ?)
                 """,
                 (
                     survey_id, identity["user_id"],
-                    identity["contract_id"], payload.name, now, now,
+                    identity["contract_id"], payload.name,
+                    closes_on, now, now,
                 ),
             )
             db.execute(
@@ -291,6 +302,7 @@ def update_survey(
     payload: UpdateSurvey,
     identity=Depends(get_survey_identity),
 ):
+    closes_on = validate_deadline(payload.closes_on)
     now = timestamp()
     form_json = json.dumps(
         payload.form.model_dump(), ensure_ascii=False
@@ -323,12 +335,22 @@ def update_survey(
             db.execute(
                 """
                 UPDATE surveys
-                SET name = ?, current_version = ?, updated_at = ?
+                SET name = ?, current_version = ?, closes_on = ?,
+                    updated_at = ?
                 WHERE survey_id = ?
                 """,
-                (payload.name, next_version, now, survey_id),
+                (payload.name, next_version, closes_on, now, survey_id),
             )
 
         return survey_result(
             db, owned_survey(db, survey_id, identity)
         )
+
+
+register_invitation_routes(
+    app,
+    connect_db,
+    owned_survey,
+    get_survey_identity,
+    timestamp,
+)

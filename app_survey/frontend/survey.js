@@ -614,8 +614,9 @@ function showPreview() {
     }
 }
 
-function setEditor(name, form, surveyId = null, version = null) {
+function setEditor(name, form, surveyId = null, version = null, closesOn = "") {
     byId("surveyName").value = name;
+    byId("surveyClosesOn").value = closesOn || "";
     byId("surveyTitle").value = form.title;
     byId("surveyIntroduction").value = form.introduction || "";
 
@@ -749,6 +750,7 @@ async function refreshList() {
             () => openSurvey(survey.survey_id),
             "secondary survey-item"
         );
+        button.dataset.surveyId = survey.survey_id;
         container.append(button);
     }
 }
@@ -762,7 +764,7 @@ async function openSurvey(surveyId) {
             `surveys/${encodeURIComponent(surveyId)}`
         );
         setEditor(
-            survey.name, survey.form, survey.survey_id, survey.version
+            survey.name, survey.form, survey.survey_id, survey.version, survey.closes_on
         );
         renderPreview(survey.form);
         setStatus("Undersökningen är öppnad.");
@@ -782,7 +784,21 @@ async function saveSurvey() {
         if (!name || name.length > 200) {
             throw new Error("Namnet ska innehålla 1–200 tecken.");
         }
-        payload = { name, form: buildForm() };
+        const closesOn = byId("surveyClosesOn").value;
+        const parts = new Intl.DateTimeFormat("sv-SE", {
+            timeZone: "Europe/Stockholm",
+            year: "numeric", month: "2-digit", day: "2-digit"
+        }).formatToParts(new Date());
+        const part = type => parts.find(item => item.type === type).value;
+        const today = `${part("year")}-${part("month")}-${part("day")}`;
+        if (!closesOn || !byId("surveyClosesOn").checkValidity()) {
+            throw new Error("Ange en giltig sista svarsdag.");
+        }
+        if (closesOn < today) {
+            throw new Error("Sista svarsdag får inte vara före dagens datum.");
+        }
+
+        payload = { name, closes_on: closesOn, form: buildForm() };
     } catch (error) {
         setStatus(error.message, true);
         return;
@@ -844,6 +860,7 @@ function exportJson() {
         const form = buildForm();
         const data = {
             name: byId("surveyName").value.trim(),
+            closes_on: byId("surveyClosesOn").value || null,
             form
         };
         const blob = new Blob(
@@ -898,7 +915,7 @@ byId("refreshButton").addEventListener("click", async () => {
     }
 });
 
-["surveyName", "surveyTitle", "surveyIntroduction"].forEach(id => {
+["surveyName", "surveyClosesOn", "surveyTitle", "surveyIntroduction"].forEach(id => {
     byId(id).addEventListener("input", markDirty);
 });
 
