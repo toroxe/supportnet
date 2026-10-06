@@ -1,3 +1,6 @@
+// MySupportNet PWA
+// Version: 2026.10.06-01
+
 let deferredPrompt = null;
 
 const installButton = document.getElementById("installPWA");
@@ -6,7 +9,35 @@ if (installButton) {
     installButton.style.display = "none";
 }
 
-// Service worker är avstängd. Registrera inte /user/sw.js.
+async function registerServiceWorker() {
+    if (!("serviceWorker" in navigator)) return;
+
+    try {
+        const registration = await navigator.serviceWorker.register(
+            "/user/sw.js",
+            {
+                scope: "/user/",
+                updateViaCache: "none"
+            }
+        );
+
+        console.log(
+            "✅ MSN service worker registrerad:",
+            registration.scope
+        );
+    } catch (error) {
+        console.error(
+            "❌ MSN service worker kunde inte registreras:",
+            error
+        );
+    }
+}
+
+if (document.readyState === "complete") {
+    registerServiceWorker();
+} else {
+    window.addEventListener("load", registerServiceWorker, { once: true });
+}
 
 window.addEventListener("beforeinstallprompt", event => {
     event.preventDefault();
@@ -21,11 +52,16 @@ if (installButton) {
     installButton.addEventListener("click", async () => {
         if (!deferredPrompt) return;
 
-        deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
-
+        const promptEvent = deferredPrompt;
         deferredPrompt = null;
         installButton.style.display = "none";
+
+        try {
+            await promptEvent.prompt();
+            await promptEvent.userChoice;
+        } catch (error) {
+            console.error("❌ Appinstallationen kunde inte startas:", error);
+        }
     });
 }
 

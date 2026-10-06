@@ -1,18 +1,11 @@
+// MySupportNet service worker
+// Version: 2026.10.06-01
+// Ingen cache eller interception av nätverksanrop.
 
-const CACHE_NAME = "msn-user-v1";
-
-self.addEventListener("install", () => {
-    self.skipWaiting();
+self.addEventListener("install", event => {
+    event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", event => {
     event.waitUntil(self.clients.claim());
-});
-
-self.addEventListener("fetch", event => {
-    if (event.request.method !== "GET") return;
-
-    event.respondWith(
-        fetch(event.request).catch(() => caches.match(event.request))
-    );
 });
