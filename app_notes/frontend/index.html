@@ -1,92 +1,97 @@
 <!DOCTYPE html>
 <html lang="sv">
-
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
     <title>Notes | MySupportNet</title>
-
     <link rel="stylesheet" href="notes.css">
 </head>
-
 <body>
-
     <header class="app-header">
-        <div class="app-brand">
-            <span class="msn-name">MySupportNet</span>
-            <span class="app-name">Notes</span>
+        <div class="header-content">
+            <div class="app-brand">
+                <span class="msn-name">MySupportNet</span>
+                <span class="app-name">Notes</span>
+            </div>
+            <nav class="app-navigation" aria-label="Appnavigation">
+                <button id="helpButton" class="btn btn-secondary"
+                        type="button" aria-label="Instruktion för Notes"
+                        aria-controls="helpDialog">?</button>
+                <a class="btn btn-secondary"
+                   href="/user/pages/userDashboard.html">Dashboard</a>
+                <button id="logoutButton" class="btn btn-secondary"
+                        type="button">Logga ut</button>
+            </nav>
         </div>
-        <nav class="app-navigation" aria-label="Navigation">
-            <a class="btn btn-secondary" href="/user/pages/userDashboard.html">Dashboard</a>
-            <button class="btn btn-secondary" id="logoutButton" type="button">Logga ut</button>
-        </nav>
     </header>
 
+    <dialog id="helpDialog" aria-labelledby="helpTitle">
+        <div class="section-heading">
+            <h2 id="helpTitle">Så använder du Notes</h2>
+            <button id="closeHelpButton" class="btn btn-secondary"
+                    type="button">Stäng</button>
+        </div>
+        <ol>
+            <li>Skriv din anteckning i textfältet.</li>
+            <li>
+                Välj Tala för att diktera på svenska.
+                Tillåt mikrofonen om webbläsaren frågar.
+                Välj Stoppa för att avsluta.
+                Tal stöds inte i alla webbläsare.
+            </li>
+            <li>Välj Spara för att spara en ny anteckning.</li>
+            <li>
+                Klicka på texten i en sparad anteckning för att öppna den.
+                Ändra texten och välj Uppdatera.
+            </li>
+            <li>
+                Kopiera kopierar texten i skrivfältet till urklipp.
+            </li>
+            <li>
+                Rensa tömmer skrivfältet så att du kan börja en ny anteckning.
+                Den sparade anteckningen finns kvar.
+            </li>
+            <li>
+                Klicka på × vid en sparad anteckning för att ta bort den.
+                Anteckningen tas bort direkt.
+            </li>
+            <li>
+                Dashboard tar dig tillbaka till Mina tjänster.
+                Logga ut avslutar din inloggning.
+            </li>
+        </ol>
+    </dialog>
+
     <main class="app-container">
-
         <section class="note-editor">
+            <textarea id="note"
+                      placeholder="Skriv eller tala in din anteckning..."
+                      aria-label="Anteckning"></textarea>
 
-            <textarea
-                id="note"
-                placeholder="Skriv eller tala in din anteckning..."
-                aria-label="Anteckning"></textarea>
-
-            <button
-                id="speechButton"
-                class="btn btn-primary btn-speech"
-                type="button">
+            <button id="speechButton" class="btn btn-primary btn-speech"
+                    type="button">
                 🎤 Tala
             </button>
 
             <div class="editor-actions">
-
-                <button
-                    id="saveButton"
-                    class="btn btn-primary"
-                    type="button">
-                    Spara
-                </button>
-
-                <button
-                    id="copyButton"
-                    class="btn btn-secondary"
-                    type="button">
-                    Kopiera
-                </button>
-
-                <button
-                    id="clearButton"
-                    class="btn btn-secondary"
-                    type="button">
-                    Rensa
-                </button>
-
+                <button id="saveButton" class="btn btn-primary"
+                        type="button">Spara</button>
+                <button id="copyButton" class="btn btn-secondary"
+                        type="button">Kopiera</button>
+                <button id="clearButton" class="btn btn-secondary"
+                        type="button">Rensa</button>
             </div>
 
-            <div id="status"
-                 class="status"
-                 aria-live="polite"></div>
-
+            <div id="status" class="status" aria-live="polite"></div>
         </section>
 
         <section class="notes-section">
-
             <h2>Mina anteckningar</h2>
-
-            <div id="notesList"
-                 class="notes-list">
-
-                <div class="empty">
-                    Hämtar anteckningar…
-                </div>
-
+            <div id="notesList" class="notes-list">
+                <div class="empty">Hämtar anteckningar…</div>
             </div>
-
         </section>
-
     </main>
 
     <footer class="app-footer">
@@ -94,6 +99,6 @@
     </footer>
 
     <script src="notes.js"></script>
-
+    <script src="notes-help.js"></script>
 </body>
 </html>
