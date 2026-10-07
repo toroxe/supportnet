@@ -1,5 +1,5 @@
 # File: app_survey/backend/main.py
-# Version: 2026.10.06-04
+# Version: 2026.10.06-05
 # Status: DEVELOPMENT
 
 import json
@@ -66,8 +66,17 @@ async def lifespan(app):
                     REFERENCES surveys(survey_id)
             );
         """)
+
         initialize_deadlines(db)
         initialize_invitations(db)
+
+        columns = {
+            row["name"]
+            for row in db.execute("PRAGMA table_info(surveys)")
+        }
+        if "hidden_at" not in columns:
+            db.execute("ALTER TABLE surveys ADD COLUMN hidden_at TEXT")
+
         db.commit()
 
     yield
@@ -107,23 +116,29 @@ class Question(BaseModel):
         if self.type in {"select", "radio", "checkbox"}:
             if len(self.options) < 2:
                 raise ValueError("Valfrågor behöver minst två alternativ")
+
             if any(
                 not option or len(option) > 300
                 for option in self.options
             ):
                 raise ValueError("Alternativ måste innehålla 1–300 tecken")
+
             if len(set(self.options)) != len(self.options):
                 raise ValueError("Alternativen måste vara unika")
+
         elif self.options:
             raise ValueError("Denna frågetyp använder inte alternativ")
 
         if self.type == "sum":
             if self.required:
                 raise ValueError("Summafält kan inte vara obligatoriska")
+
             if not self.sources:
                 raise ValueError("Summafält behöver minst ett talfält")
+
             if len(set(self.sources)) != len(self.sources):
                 raise ValueError("Summafältets källor måste vara unika")
+
         elif self.sources or self.hidden:
             raise ValueError(
                 "Endast summafält får ha källor eller döljas"
@@ -210,6 +225,7 @@ def survey_result(db, row):
     return {
         "survey_id": row["survey_id"],
         "name": row["name"],
+        "hidden_at": row["hidden_at"],
         "version": row["current_version"],
         "closes_on": row["closes_on"],
         "created_at": row["created_at"],
@@ -228,17 +244,21 @@ def health():
 
 
 @app.get("/surveys")
-def list_surveys(identity=Depends(get_survey_identity)):
+def list_surveys(
+    include_hidden: bool = False,
+    identity=Depends(get_survey_identity),
+):
     with closing(connect_db()) as db:
         rows = db.execute(
             """
             SELECT survey_id, name, current_version AS version,
-                   closes_on, created_at, updated_at
+                   closes_on, created_at, updated_at, hidden_at
             FROM surveys
             WHERE user_id = ? AND contract_id = ?
+              AND (? OR hidden_at IS NULL)
             ORDER BY updated_at DESC
             """,
-            (identity["user_id"], identity["contract_id"]),
+            (identity["user_id"], identity["contract_id"], include_hidden),
         ).fetchall()
 
         return [dict(row) for row in rows]
@@ -345,6 +365,37 @@ def update_survey(
         return survey_result(
             db, owned_survey(db, survey_id, identity)
         )
+
+
+@app.post("/surveys/{survey_id}/hide")
+def hide_survey(
+    survey_id: str,
+    identity=Depends(get_survey_identity),
+):
+    return set_survey_visibility(survey_id, identity, True)
+
+
+@app.post("/surveys/{survey_id}/restore")
+def restore_survey(
+    survey_id: str,
+    identity=Depends(get_survey_identity),
+):
+    return set_survey_visibility(survey_id, identity, False)
+
+
+def set_survey_visibility(survey_id, identity, hidden):
+    with closing(connect_db()) as db:
+        with db:
+            db.execute("BEGIN IMMEDIATE")
+            row = owned_survey(db, survey_id, identity)
+            hidden_at = (row["hidden_at"] or timestamp()) if hidden else None
+
+            db.execute(
+                "UPDATE surveys SET hidden_at = ? WHERE survey_id = ?",
+                (hidden_at, survey_id),
+            )
+
+        return {"survey_id": survey_id, "hidden_at": hidden_at}
 
 
 register_invitation_routes(

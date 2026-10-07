@@ -1,5 +1,5 @@
 # File: app_survey/backend/invitations.py
-# Version: 2026.10.06-02
+# Version: 2026.10.06-04
 # Status: DEVELOPMENT
 
 import hashlib
@@ -15,6 +15,7 @@ from fastapi import Depends, HTTPException, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.deadlines import deadline_passed, require_open_deadline
+from backend.link_crypto import encrypt_token, decrypt_token
 
 
 class CreateInvitation(BaseModel):
@@ -40,6 +41,7 @@ def initialize_invitations(db):
             version INTEGER NOT NULL,
             label TEXT NOT NULL,
             token_hash TEXT NOT NULL UNIQUE,
+            token_encrypted TEXT,
             created_at TEXT NOT NULL,
             sent_at TEXT,
             answered_at TEXT,
@@ -58,7 +60,34 @@ def initialize_invitations(db):
             FOREIGN KEY (invitation_id)
                 REFERENCES survey_invitations(invitation_id)
         );
+
+        CREATE TABLE IF NOT EXISTS survey_invitation_events (
+            event_id TEXT PRIMARY KEY,
+            invitation_id TEXT NOT NULL,
+            action TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            contract_id INTEGER NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (invitation_id)
+                REFERENCES survey_invitations(invitation_id)
+        );
     """)
+
+    columns = {
+        row["name"]
+        for row in db.execute("PRAGMA table_info(survey_invitations)")
+    }
+
+    if "token_encrypted" not in columns:
+        db.execute(
+            "ALTER TABLE survey_invitations "
+            "ADD COLUMN token_encrypted TEXT"
+        )
+
+    if "hidden_at" not in columns:
+        db.execute(
+            "ALTER TABLE survey_invitations ADD COLUMN hidden_at TEXT"
+        )
 
 
 def token_hash(token):
@@ -71,9 +100,10 @@ def invitation_result(row):
         for key in (
             "invitation_id", "survey_id", "version", "label",
             "created_at", "sent_at", "answered_at", "revoked_at",
-            "closes_on",
+            "closes_on", "hidden_at",
         )
     }
+    result["link_saved"] = bool(row["token_encrypted"])
 
     if row["answered_at"]:
         result["status"] = "ANSWERED"
@@ -122,6 +152,7 @@ def invitation_form(db, row):
         """,
         (row["survey_id"], row["version"]),
     ).fetchone()
+
     return json.loads(version["form_json"])
 
 
@@ -160,6 +191,7 @@ def validated_answers(form, supplied):
                 or any(item not in question["options"] for item in value)
             ):
                 invalid("ogiltiga svarsalternativ")
+
             answers[key] = value
             continue
 
@@ -172,6 +204,7 @@ def validated_answers(form, supplied):
                 invalid("ange ett giltigt tal")
 
             raw = str(value).strip().replace(",", ".")
+
             if not re.fullmatch(
                 r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?",
                 raw,
@@ -185,6 +218,7 @@ def validated_answers(form, supplied):
 
             if not number.is_finite() or abs(number) > Decimal("1e15"):
                 invalid("talet är för stort eller ogiltigt")
+
             if number and number.adjusted() < -100:
                 invalid("talet är för litet")
 
@@ -196,6 +230,7 @@ def validated_answers(form, supplied):
             invalid("ange text med högst 10000 tecken")
 
         value = value.strip()
+
         if not value:
             if question["required"]:
                 invalid("ett svar krävs")
@@ -216,13 +251,16 @@ def validated_answers(form, supplied):
         answers[key] = value
 
     calculated = {}
+
     with localcontext() as context:
         context.prec = 150
+
         for question in form["questions"]:
             if question["type"] != "sum":
                 continue
 
             sources = question["sources"]
+
             if any(source not in numbers for source in sources):
                 calculated[question["id"]] = None
             else:
@@ -232,7 +270,8 @@ def validated_answers(form, supplied):
                 )
                 rounded = total.quantize(Decimal("0.01"))
                 calculated[question["id"]] = format(
-                    abs(rounded) if rounded == 0 else rounded, ".2f"
+                    abs(rounded) if rounded == 0 else rounded,
+                    ".2f",
                 )
 
     return answers, calculated
@@ -243,6 +282,7 @@ def register_invitation_routes(
 ):
     def owned_invitation(db, survey_id, invitation_id, identity):
         owned_survey(db, survey_id, identity)
+
         row = db.execute(
             """
             SELECT i.*, s.closes_on
@@ -255,23 +295,104 @@ def register_invitation_routes(
 
         if row is None:
             raise HTTPException(404, "Inbjudningen hittades inte")
+
         return row
 
+    def require_usable_link(row):
+        if row["answered_at"]:
+            raise HTTPException(409, "Svaret är redan inskickat")
+        if row["revoked_at"]:
+            raise HTTPException(409, "Länken är återkallad")
+
+        require_open_deadline(row["closes_on"])
+
+    def record_event(db, invitation_id, action, identity):
+        db.execute(
+            """
+            INSERT INTO survey_invitation_events
+            (event_id, invitation_id, action,
+             user_id, contract_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                str(uuid4()), invitation_id, action,
+                identity["user_id"], identity["contract_id"],
+                timestamp(),
+            ),
+        )
+
     @app.get("/surveys/{survey_id}/invitations")
-    def list_invitations(survey_id: str, identity=Depends(get_identity)):
+    def list_invitations(
+        survey_id: str,
+        include_hidden: bool = False,
+        identity=Depends(get_identity),
+    ):
         with closing(connect_db()) as db:
             owned_survey(db, survey_id, identity)
+
             rows = db.execute(
                 """
                 SELECT i.*, s.closes_on
                 FROM survey_invitations i
                 JOIN surveys s ON s.survey_id = i.survey_id
-                WHERE i.survey_id = ?
+                WHERE i.survey_id = ? AND (? OR i.hidden_at IS NULL)
                 ORDER BY i.created_at DESC
                 """,
-                (survey_id,),
+                (survey_id, include_hidden),
             ).fetchall()
+
             return [invitation_result(row) for row in rows]
+
+    def set_invitation_visibility(
+        survey_id, invitation_id, identity, hidden
+    ):
+        with closing(connect_db()) as db:
+            with db:
+                db.execute("BEGIN IMMEDIATE")
+
+                row = owned_invitation(
+                    db, survey_id, invitation_id, identity
+                )
+                hidden_at = (
+                    (row["hidden_at"] or timestamp()) if hidden else None
+                )
+
+                if hidden_at != row["hidden_at"]:
+                    db.execute(
+                        "UPDATE survey_invitations SET hidden_at = ? "
+                        "WHERE invitation_id = ?",
+                        (hidden_at, invitation_id),
+                    )
+                    record_event(
+                        db,
+                        invitation_id,
+                        "HIDDEN" if hidden else "RESTORED",
+                        identity,
+                    )
+
+            return invitation_result(
+                owned_invitation(db, survey_id, invitation_id, identity)
+            )
+
+    @app.post("/surveys/{survey_id}/invitations/{invitation_id}/hide")
+    def hide_invitation(
+        survey_id: str,
+        invitation_id: str,
+        identity=Depends(get_identity),
+    ):
+        return set_invitation_visibility(
+            survey_id, invitation_id, identity, True
+        )
+
+    @app.post("/surveys/{survey_id}/invitations/{invitation_id}/restore")
+    def restore_invitation(
+        survey_id: str,
+        invitation_id: str,
+        identity=Depends(get_identity),
+    ):
+        return set_invitation_visibility(
+            survey_id, invitation_id, identity, False
+        )
 
     @app.post("/surveys/{survey_id}/invitations", status_code=201)
     def create_invitation(
@@ -294,26 +415,107 @@ def register_invitation_routes(
                     )
 
                 require_open_deadline(survey["closes_on"])
+                encrypted = encrypt_token(token)
 
                 db.execute(
                     """
                     INSERT INTO survey_invitations
                     (invitation_id, survey_id, version, label,
-                     token_hash, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                     token_hash, token_encrypted, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         invitation_id, survey_id,
                         payload.expected_version, payload.label,
-                        token_hash(token), timestamp(),
+                        token_hash(token), encrypted, timestamp(),
                     ),
                 )
+
+                record_event(db, invitation_id, "CREATED", identity)
+
                 row = owned_invitation(
                     db, survey_id, invitation_id, identity
                 )
 
             response.headers["Cache-Control"] = "no-store"
             return {**invitation_result(row), "token": token}
+
+    @app.get("/surveys/{survey_id}/invitations/{invitation_id}/link")
+    def get_saved_link(
+        survey_id: str,
+        invitation_id: str,
+        response: Response,
+        identity=Depends(get_identity),
+    ):
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["Referrer-Policy"] = "no-referrer"
+
+        with closing(connect_db()) as db:
+            row = owned_invitation(
+                db, survey_id, invitation_id, identity
+            )
+            require_usable_link(row)
+
+            if not row["token_encrypted"]:
+                raise HTTPException(
+                    409,
+                    "Den äldre länken är inte sparad. "
+                    "Skapa en ersättningslänk.",
+                )
+
+            token = decrypt_token(row["token_encrypted"])
+
+            if not secrets.compare_digest(
+                token_hash(token), row["token_hash"]
+            ):
+                raise HTTPException(
+                    503, "Den sparade länken kunde inte verifieras."
+                )
+
+            return {**invitation_result(row), "token": token}
+
+    @app.post("/surveys/{survey_id}/invitations/{invitation_id}/replace-link")
+    def replace_link(
+        survey_id: str,
+        invitation_id: str,
+        response: Response,
+        identity=Depends(get_identity),
+    ):
+        response.headers["Cache-Control"] = "no-store"
+        token = secrets.token_urlsafe(32)
+
+        with closing(connect_db()) as db:
+            with db:
+                db.execute("BEGIN IMMEDIATE")
+
+                row = owned_invitation(
+                    db, survey_id, invitation_id, identity
+                )
+                require_usable_link(row)
+
+                # Behåll respondent och ursprunglig formulärversion.
+                # Den gamla tokenens hash ersätts, så länken spärras.
+                db.execute(
+                    """
+                    UPDATE survey_invitations
+                    SET token_hash = ?, token_encrypted = ?, sent_at = NULL
+                    WHERE invitation_id = ?
+                    """,
+                    (
+                        token_hash(token), encrypt_token(token),
+                        invitation_id,
+                    ),
+                )
+
+                record_event(
+                    db, invitation_id, "LINK_REPLACED", identity
+                )
+
+                updated = owned_invitation(
+                    db, survey_id, invitation_id, identity
+                )
+
+            return {**invitation_result(updated), "token": token}
 
     @app.post("/surveys/{survey_id}/invitations/{invitation_id}/sent")
     def mark_sent(
@@ -324,22 +526,23 @@ def register_invitation_routes(
         with closing(connect_db()) as db:
             with db:
                 db.execute("BEGIN IMMEDIATE")
+
                 row = owned_invitation(
                     db, survey_id, invitation_id, identity
                 )
+                require_usable_link(row)
 
-                if row["revoked_at"]:
-                    raise HTTPException(409, "Länken är återkallad")
-                require_open_deadline(row["closes_on"])
+                if not row["sent_at"]:
+                    db.execute(
+                        """
+                        UPDATE survey_invitations
+                        SET sent_at = ?
+                        WHERE invitation_id = ?
+                        """,
+                        (timestamp(), invitation_id),
+                    )
 
-                db.execute(
-                    """
-                    UPDATE survey_invitations
-                    SET sent_at = COALESCE(sent_at, ?)
-                    WHERE invitation_id = ?
-                    """,
-                    (timestamp(), invitation_id),
-                )
+                    record_event(db, invitation_id, "SENT", identity)
 
             return invitation_result(
                 owned_invitation(db, survey_id, invitation_id, identity)
@@ -354,30 +557,42 @@ def register_invitation_routes(
         with closing(connect_db()) as db:
             with db:
                 db.execute("BEGIN IMMEDIATE")
+
                 row = owned_invitation(
                     db, survey_id, invitation_id, identity
                 )
 
                 if row["answered_at"]:
-                    raise HTTPException(409, "Svaret är redan inskickat")
+                    raise HTTPException(
+                        409, "Svaret är redan inskickat"
+                    )
 
-                db.execute(
-                    """
-                    UPDATE survey_invitations
-                    SET revoked_at = COALESCE(revoked_at, ?)
-                    WHERE invitation_id = ?
-                    """,
-                    (timestamp(), invitation_id),
-                )
+                if not row["revoked_at"]:
+                    db.execute(
+                        """
+                        UPDATE survey_invitations
+                        SET revoked_at = ?
+                        WHERE invitation_id = ?
+                        """,
+                        (timestamp(), invitation_id),
+                    )
+
+                    record_event(
+                        db, invitation_id, "REVOKED", identity
+                    )
 
             return invitation_result(
                 owned_invitation(db, survey_id, invitation_id, identity)
             )
 
     @app.get("/surveys/{survey_id}/responses")
-    def list_responses(survey_id: str, identity=Depends(get_identity)):
+    def list_responses(
+        survey_id: str,
+        identity=Depends(get_identity),
+    ):
         with closing(connect_db()) as db:
             owned_survey(db, survey_id, identity)
+
             rows = db.execute(
                 """
                 SELECT r.response_json
@@ -389,7 +604,10 @@ def register_invitation_routes(
                 """,
                 (survey_id,),
             ).fetchall()
-            return [json.loads(row["response_json"]) for row in rows]
+
+            return [
+                json.loads(row["response_json"]) for row in rows
+            ]
 
     @app.get("/participate")
     def get_public_form(token: str, response: Response):
@@ -399,6 +617,7 @@ def register_invitation_routes(
         with closing(connect_db()) as db:
             row = active_invitation(db, token)
             form = invitation_form(db, row)
+
             form["questions"] = [
                 question for question in form["questions"]
                 if not (
@@ -424,8 +643,10 @@ def register_invitation_routes(
         with closing(connect_db()) as db:
             with db:
                 db.execute("BEGIN IMMEDIATE")
+
                 row = active_invitation(db, token)
                 form = invitation_form(db, row)
+
                 answers, calculated = validated_answers(
                     form, payload.answers
                 )
@@ -456,6 +677,7 @@ def register_invitation_routes(
                         now,
                     ),
                 )
+
                 db.execute(
                     """
                     UPDATE survey_invitations
@@ -465,4 +687,7 @@ def register_invitation_routes(
                     (now, row["invitation_id"]),
                 )
 
-            return {"status": "ok", "message": "Tack! Svaret är sparat."}
+            return {
+                "status": "ok",
+                "message": "Tack! Svaret är sparat.",
+            }

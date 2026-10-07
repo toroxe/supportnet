@@ -1,5 +1,5 @@
 // File: app_survey/frontend/survey.js
-// Version: 2026.10.06-03
+// Version: 2026.10.06-04
 // Status: DEVELOPMENT
 
 "use strict";
@@ -734,24 +734,120 @@ async function apiFetch(path, options = {}) {
     return data;
 }
 
+let showHiddenSurveys = false;
+let surveyListRequest = 0;
+
+const showHiddenSurveysButton = actionButton("Visa dolda", async () => {
+    if (busy) return;
+
+    showHiddenSurveys = !showHiddenSurveys;
+    showHiddenSurveysButton.textContent = showHiddenSurveys
+        ? "Dölj dolda"
+        : "Visa dolda";
+    showHiddenSurveysButton.setAttribute(
+        "aria-pressed",
+        String(showHiddenSurveys)
+    );
+
+    try {
+        await refreshList();
+    } catch (error) {
+        setStatus(error.message, true);
+    }
+}, "secondary");
+
+showHiddenSurveysButton.setAttribute("aria-pressed", "false");
+byId("refreshButton").parentElement.append(showHiddenSurveysButton);
+
+async function changeSurveyVisibility(survey, hidden) {
+    if (busy) return;
+
+    const active = currentSurveyId === survey.survey_id;
+
+    if (hidden && active && !canReplaceEditor()) return;
+
+    if (hidden && !window.confirm(
+        `Dölj ${survey.name}? Svar, länkar och historik finns kvar. ` +
+        "Undersökningen kan hämtas med Visa dolda."
+    )) return;
+
+    busy = true;
+
+    try {
+        await apiFetch(
+            `surveys/${encodeURIComponent(survey.survey_id)}/` +
+            (hidden ? "hide" : "restore"),
+            { method: "POST" }
+        );
+
+        if (hidden && active) {
+            setEditor("", {
+                title: "",
+                introduction: "",
+                questions: [newQuestion()]
+            });
+        }
+
+        await refreshList();
+
+        setStatus(hidden
+            ? "Undersökningen är dold. Befintliga länkar fungerar fortfarande."
+            : "Undersökningen visas igen."
+        );
+    } catch (error) {
+        setStatus(error.message, true);
+    } finally {
+        busy = false;
+    }
+}
+
 async function refreshList() {
-    const surveys = await apiFetch("surveys");
+    const request = ++surveyListRequest;
+
+    const surveys = await apiFetch(
+        `surveys?include_hidden=${showHiddenSurveys}`
+    );
+
+    if (request !== surveyListRequest) return;
+
     const container = byId("surveyList");
     container.replaceChildren();
 
     if (!surveys.length) {
-        container.append(element("p", "Inga sparade undersökningar ännu."));
+        container.append(element("p", "Inga undersökningar att visa."));
         return;
     }
 
     for (const survey of surveys) {
+        const row = element("div", undefined, "survey-list-row");
+        row.classList.toggle("is-hidden", Boolean(survey.hidden_at));
+
         const button = actionButton(
-            `${survey.name} · version ${survey.version}`,
+            `${survey.name} · version ${survey.version}` +
+            (survey.hidden_at ? " · Dold" : ""),
             () => openSurvey(survey.survey_id),
             "secondary survey-item"
         );
+
         button.dataset.surveyId = survey.survey_id;
-        container.append(button);
+
+        const visibility = actionButton(
+            survey.hidden_at ? "Visa igen" : "×",
+            () => changeSurveyVisibility(survey, !survey.hidden_at),
+            "secondary"
+        );
+
+        visibility.setAttribute(
+            "aria-label",
+            `${survey.hidden_at ? "Visa igen" : "Dölj"}: ${survey.name}`
+        );
+
+        visibility.title = survey.hidden_at
+            ? "Visa undersökningen igen"
+            : "Dölj undersökningen";
+
+        row.append(button, visibility);
+        container.append(row);
     }
 }
 
@@ -763,9 +859,15 @@ async function openSurvey(surveyId) {
         const survey = await apiFetch(
             `surveys/${encodeURIComponent(surveyId)}`
         );
+
         setEditor(
-            survey.name, survey.form, survey.survey_id, survey.version, survey.closes_on
+            survey.name,
+            survey.form,
+            survey.survey_id,
+            survey.version,
+            survey.closes_on
         );
+
         renderPreview(survey.form);
         setStatus("Undersökningen är öppnad.");
     } catch (error) {
@@ -779,32 +881,46 @@ async function saveSurvey() {
     if (busy) return;
 
     let payload;
+
     try {
         const name = byId("surveyName").value.trim();
+
         if (!name || name.length > 200) {
             throw new Error("Namnet ska innehålla 1–200 tecken.");
         }
+
         const closesOn = byId("surveyClosesOn").value;
+
         const parts = new Intl.DateTimeFormat("sv-SE", {
             timeZone: "Europe/Stockholm",
-            year: "numeric", month: "2-digit", day: "2-digit"
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
         }).formatToParts(new Date());
+
         const part = type => parts.find(item => item.type === type).value;
         const today = `${part("year")}-${part("month")}-${part("day")}`;
+
         if (!closesOn || !byId("surveyClosesOn").checkValidity()) {
             throw new Error("Ange en giltig sista svarsdag.");
         }
+
         if (closesOn < today) {
             throw new Error("Sista svarsdag får inte vara före dagens datum.");
         }
 
-        payload = { name, closes_on: closesOn, form: buildForm() };
+        payload = {
+            name,
+            closes_on: closesOn,
+            form: buildForm()
+        };
     } catch (error) {
         setStatus(error.message, true);
         return;
     }
 
     busy = true;
+
     const editorPanel = byId("surveyName").closest(".panel");
     const controls = Array.from(
         editorPanel.querySelectorAll("input, textarea, select, button")
@@ -833,6 +949,7 @@ async function saveSurvey() {
 
         byId("versionInfo").textContent =
             `Sparad version: ${saved.version}`;
+
         renderPreview(saved.form);
         setStatus(`Undersökningen är sparad som version ${saved.version}.`);
 
@@ -858,15 +975,18 @@ async function saveSurvey() {
 function exportJson() {
     try {
         const form = buildForm();
+
         const data = {
             name: byId("surveyName").value.trim(),
             closes_on: byId("surveyClosesOn").value || null,
             form
         };
+
         const blob = new Blob(
             [JSON.stringify(data, null, 2)],
             { type: "application/json" }
         );
+
         const url = URL.createObjectURL(blob);
         const link = element("a");
         link.href = url;
@@ -874,6 +994,7 @@ function exportJson() {
         document.body.append(link);
         link.click();
         link.remove();
+
         setTimeout(() => URL.revokeObjectURL(url), 1000);
         setStatus("JSON-filen är hämtad.");
     } catch (error) {
@@ -897,10 +1018,12 @@ byId("exportButton").addEventListener("click", exportJson);
 
 byId("addQuestionButton").addEventListener("click", () => {
     if (busy) return;
+
     if (questions.length >= 100) {
         setStatus("Högst 100 frågor per formulär.", true);
         return;
     }
+
     questions.push(newQuestion());
     markDirty();
     renderQuestionEditor();
@@ -915,7 +1038,12 @@ byId("refreshButton").addEventListener("click", async () => {
     }
 });
 
-["surveyName", "surveyClosesOn", "surveyTitle", "surveyIntroduction"].forEach(id => {
+[
+    "surveyName",
+    "surveyClosesOn",
+    "surveyTitle",
+    "surveyIntroduction"
+].forEach(id => {
     byId(id).addEventListener("input", markDirty);
 });
 

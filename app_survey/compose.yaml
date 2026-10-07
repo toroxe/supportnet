@@ -8,10 +8,13 @@ services:
     environment:
       MSN_SURVEY_ACCESS_URL: "${MSN_SURVEY_ACCESS_URL:?Ange MSN_SURVEY_ACCESS_URL}"
       SURVEY_DB_PATH: /data/survey.db
+      SURVEY_LINK_KEY_FILE: /run/secrets/survey_link_key
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
       - survey_data:/data
+    secrets:
+      - survey_link_key
 
   frontend:
     build:
@@ -24,3 +27,7 @@ services:
 
 volumes:
   survey_data:
+
+secrets:
+  survey_link_key:
+    file: "${SURVEY_LINK_KEY_HOST_PATH:-/home/toroxe/.config/supportnet/survey-link.key}"
